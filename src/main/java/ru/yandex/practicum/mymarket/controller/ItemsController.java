@@ -10,14 +10,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.yandex.practicum.mymarket.dto.Item;
 import ru.yandex.practicum.mymarket.dto.Paging;
+import ru.yandex.practicum.mymarket.service.ItemsService;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Controller
 @RequestMapping("/items")
 public class ItemsController {
 
-//    @GetMapping("/")
+    private ItemsService itemsService;
+
+    public ItemsController(ItemsService itemsService) {
+        this.itemsService = itemsService;
+    }
+
+    //    @GetMapping("/")
     @GetMapping
     public String getItems(@RequestParam(name = "search", required = false) String search,
                            @RequestParam(name = "sort", required = false) String sort,
@@ -26,25 +33,24 @@ public class ItemsController {
                            Model model) {
         //todo обработка вход запроса
 
-        model.addAttribute("items", Arrays.asList(new Item(1L, "title", "description", "imageUrl", 0L, 0L),
-                new Item(2L, "title1", "description1", "imageUrl", 0L, 0L),
-                new Item(2L, "title2", "description2", "imageUrl", 0L, 0L)));
+        List<List<Item>> itemsList = itemsService.getItems(search, sort, pageNumber, pageSize);
+        model.addAttribute("items", itemsList);
 
         model.addAttribute("paging", new Paging(Integer.valueOf(pageNumber), Integer.valueOf(pageSize)));
         return "items";
     }
 
     @PostMapping
-    public String changeCount(@RequestParam(name = "id") String id,
+    public String changeCount(@RequestParam(name = "id") Long id,
                               @RequestParam(name = "search", required = false) String search,
-                           @RequestParam(name = "sort", required = false) String sort,
-                           @RequestParam(name = "pageNumber", required = false) String pageNumber,
-                           @RequestParam(name = "pageSize", required = false) String pageSize,
-                           @RequestParam(name = "action") String action,
-                            RedirectAttributes redirectAttributes) {
+                              @RequestParam(name = "sort", required = false) String sort,
+                              @RequestParam(name = "pageNumber", required = false) String pageNumber,
+                              @RequestParam(name = "pageSize", required = false) String pageSize,
+                              @RequestParam(name = "action") String action,
+                              RedirectAttributes redirectAttributes) {
 
         //todo обработка вход запроса id/action
-        //todo itemsService.updateItemCount(id, action)
+        itemsService.updateCount(id, action);
 
         redirectAttributes.addAttribute("search", search);
         redirectAttributes.addAttribute("sort", sort);
@@ -55,16 +61,16 @@ public class ItemsController {
 
     @GetMapping("/{id}")
     public String getItem(@PathVariable(name = "id") Long id, Model model) {
-        Item item = new Item(2L, "title1", "description1", "imageUrl", 0L, 0L);
+        Item item = itemsService.find(id);
         model.addAttribute("item", item);
         return "item";
     }
 
     @PostMapping("/{id}")
     public String changeItemCount(@PathVariable(name = "id") Long id,
-                          @RequestParam(name = "action") String action,
-                          Model model) {
-        Item item = new Item(2L, "title1", "description1", "imageUrl", 0L, 0L);
+                                  @RequestParam(name = "action") String action,
+                                  Model model) {
+        Item item = itemsService.updateCount(id, action);
         model.addAttribute("item", item);
         return "item";
     }

@@ -7,19 +7,27 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.mymarket.dto.Item;
+import ru.yandex.practicum.mymarket.service.CartService;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Controller
 @RequestMapping("/cart/items")
 public class CartController {
 
+    private CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
+
     @GetMapping
     public String getCartItems(Model model) {
-        model.addAttribute("items", Arrays.asList(new Item(1L, "title", "description", "imageUrl", 0L, 0L),
-                new Item(2L, "title1", "description1", "imageUrl", 0L, 0L),
-                new Item(2L, "title2", "description2", "imageUrl", 0L, 0L)));
 
+        List<Item> items = cartService.getItems();
+        model.addAttribute("items", items);
+
+        //todo calculate sum
         model.addAttribute("total", 8907);
         return "cart";
     }
@@ -30,11 +38,10 @@ public class CartController {
                               Model model) {
 
         //todo обработка вход запроса id/action
-        //todo itemsService.updateItemCount(id, action)
+        List<Item> items = cartService.updateCount(id, action);
+        model.addAttribute("items", items);
 
-        model.addAttribute("items", Arrays.asList(new Item(1L, "title", "description", "imageUrl", 0L, 0L),
-                new Item(2L, "title2", "description2", "imageUrl", 0L, 0L)));
-
+        //todo calculate sum
         model.addAttribute("total", 8900);
         return "cart";
     }
