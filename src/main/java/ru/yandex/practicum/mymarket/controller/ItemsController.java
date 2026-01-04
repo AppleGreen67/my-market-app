@@ -31,12 +31,16 @@ public class ItemsController {
                            @RequestParam(name = "pageNumber", required = false) String pageNumber,
                            @RequestParam(name = "pageSize", required = false) String pageSize,
                            Model model) {
-        //todo обработка вход запроса
+        if (sort == null) sort = "NO";
+        if (!("PRICE".equals(sort) || "ALPHA".equals(sort) || "NO".equals(sort))) {
+            throw new UnsupportedOperationException();
+        }
 
         List<List<Item>> itemsList = itemsService.getItems(search, sort, pageNumber, pageSize);
         model.addAttribute("items", itemsList);
 
-        model.addAttribute("paging", new Paging(Integer.valueOf(pageNumber), Integer.valueOf(pageSize)));
+        model.addAttribute("paging",
+                new Paging(pageNumber == null ? 1 : Integer.valueOf(pageNumber), pageSize == null ? 5 : Integer.valueOf(pageSize)));
         return "items";
     }
 
@@ -49,7 +53,10 @@ public class ItemsController {
                               @RequestParam(name = "action") String action,
                               RedirectAttributes redirectAttributes) {
 
-        //todo обработка вход запроса id/action
+        if (!("MINUS".equals(action) || "PLUS".equals(action))) {
+            throw new UnsupportedOperationException();
+        }
+
         itemsService.updateCount(id, action);
 
         redirectAttributes.addAttribute("search", search);
@@ -70,6 +77,10 @@ public class ItemsController {
     public String changeItemCount(@PathVariable(name = "id") Long id,
                                   @RequestParam(name = "action") String action,
                                   Model model) {
+        if (!("MINUS".equals(action) || "PLUS".equals(action))) {
+            throw new UnsupportedOperationException();
+        }
+
         Item item = itemsService.updateCount(id, action);
         model.addAttribute("item", item);
         return "item";
