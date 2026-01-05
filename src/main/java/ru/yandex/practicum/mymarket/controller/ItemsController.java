@@ -31,7 +31,7 @@ public class ItemsController {
                            @RequestParam(name = "pageNumber", required = false) String pageNumber,
                            @RequestParam(name = "pageSize", required = false) String pageSize,
                            Model model) {
-        if (sort == null) sort = "NO";
+        if (sort == null || sort.isEmpty()) sort = "NO";
         if (!("PRICE".equals(sort) || "ALPHA".equals(sort) || "NO".equals(sort))) {
             throw new UnsupportedOperationException();
         }
