@@ -18,7 +18,7 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemsController {
 
-    private ItemsService itemsService;
+    private final ItemsService itemsService;
 
     public ItemsController(ItemsService itemsService) {
         this.itemsService = itemsService;
@@ -40,7 +40,7 @@ public class ItemsController {
         model.addAttribute("items", itemsList);
 
         model.addAttribute("paging",
-                new Paging(pageNumber == null ? 1 : Integer.valueOf(pageNumber), pageSize == null ? 5 : Integer.valueOf(pageSize)));
+                new Paging(pageNumber == null ? 1 : Integer.parseInt(pageNumber), pageSize == null ? 5 : Integer.parseInt(pageSize)));
         return "items";
     }
 

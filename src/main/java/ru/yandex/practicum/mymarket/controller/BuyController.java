@@ -10,7 +10,7 @@ import ru.yandex.practicum.mymarket.service.BuyService;
 @RequestMapping("/buy")
 public class BuyController {
 
-    private BuyService buyService;
+    private final BuyService buyService;
 
     public BuyController(BuyService buyService) {
         this.buyService = buyService;
@@ -18,7 +18,6 @@ public class BuyController {
 
     @PostMapping
     public String buy(RedirectAttributes redirectAttributes) {
-
         Long id = buyService.buy();
 
         redirectAttributes.addAttribute("newOrder", true);
