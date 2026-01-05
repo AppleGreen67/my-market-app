@@ -77,8 +77,8 @@ class ItemsControllerTest {
     void getItems_withParams() throws Exception {
         String search = "descr";
         String sort = "NO";
-        String pageNumber = "2";
-        String pageSize = "3";
+        Integer pageNumber = 2;
+        Integer pageSize = 3;
 
         List<Item> items = Arrays.asList(new Item(1L, "title1", "description1", "imageUrl", 11L, 111L),
                 new Item(2L, "title2", "description2", "imageUrl", 22L, 222L),

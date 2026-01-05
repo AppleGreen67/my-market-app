@@ -28,19 +28,21 @@ public class ItemsController {
     @GetMapping
     public String getItems(@RequestParam(name = "search", required = false) String search,
                            @RequestParam(name = "sort", required = false) String sort,
-                           @RequestParam(name = "pageNumber", required = false) String pageNumber,
-                           @RequestParam(name = "pageSize", required = false) String pageSize,
+                           @RequestParam(name = "pageNumber", required = false) String number,
+                           @RequestParam(name = "pageSize", required = false) String size,
                            Model model) {
         if (sort == null || sort.isEmpty()) sort = "NO";
         if (!("PRICE".equals(sort) || "ALPHA".equals(sort) || "NO".equals(sort))) {
             throw new UnsupportedOperationException();
         }
 
+        Integer pageNumber = number == null ? 1 : Integer.parseInt(number);
+        Integer pageSize = size == null ? 5 : Integer.parseInt(size);
+
         List<List<Item>> itemsList = itemsService.getItems(search, sort, pageNumber, pageSize);
         model.addAttribute("items", itemsList);
 
-        model.addAttribute("paging",
-                new Paging(pageNumber == null ? 1 : Integer.parseInt(pageNumber), pageSize == null ? 5 : Integer.parseInt(pageSize)));
+        model.addAttribute("paging", new Paging(pageNumber, pageSize));
         return "items";
     }
 
