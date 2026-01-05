@@ -9,7 +9,6 @@ import java.util.List;
 @Service
 public class ItemsService {
 
-
     public List<List<Item>> getItems(String search, String sort, String pageNumber, String pageSize) {
         List<Item> items = Arrays.asList(new Item(1L, "title", "description", "imageUrl", 0L, 0L),
                 new Item(2L, "title1", "description1", "imageUrl", 0L, 0L),

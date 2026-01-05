@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/cart/items")
 public class CartController {
 
-    private CartService cartService;
+    private final CartService cartService;
 
     public CartController(CartService cartService) {
         this.cartService = cartService;
@@ -23,26 +23,29 @@ public class CartController {
 
     @GetMapping
     public String getCartItems(Model model) {
-
         List<Item> items = cartService.getItems();
         model.addAttribute("items", items);
 
-        //todo calculate sum
-        model.addAttribute("total", 8907);
+        Long totalSum = cartService.calculateSum(items);
+        model.addAttribute("total", totalSum);
         return "cart";
     }
 
     @PostMapping
-    public String changeCount(@RequestParam(name = "id") String id,
+    public String changeCount(@RequestParam(name = "id") Long id,
                               @RequestParam(name = "action") String action,
                               Model model) {
+
+        if (!("MINUS".equals(action) || "PLUS".equals(action)|| "DELETE".equals(action))) {
+            throw new UnsupportedOperationException();
+        }
 
         //todo обработка вход запроса id/action
         List<Item> items = cartService.updateCount(id, action);
         model.addAttribute("items", items);
 
-        //todo calculate sum
-        model.addAttribute("total", 8900);
+        Long totalSum = cartService.calculateSum(items);
+        model.addAttribute("total", totalSum);
         return "cart";
     }
 }

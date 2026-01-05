@@ -15,8 +15,12 @@ public class CartService {
                 new Item(2L, "title2", "description2", "imageUrl", 0L, 0L));
     }
 
-    public List<Item> updateCount(String id, String action) {
+    public List<Item> updateCount(Long id, String action) {
         return Arrays.asList(new Item(1L, "title", "description", "imageUrl", 0L, 0L),
                 new Item(2L, "title2", "description2", "imageUrl", 0L, 0L));
+    }
+
+    public Long calculateSum(List<Item> items) {
+        return null;
     }
 }
