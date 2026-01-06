@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.yandex.practicum.mymarket.dto.Order;
+import ru.yandex.practicum.mymarket.dto.OrderDto;
 import ru.yandex.practicum.mymarket.service.OrderService;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class OrderController {
 
     @GetMapping
     public String getOrders(Model model) {
-        List<Order> orders = orderService.getOrders();
+        List<OrderDto> orders = orderService.getOrders();
         model.addAttribute("orders", orders);
         return "orders";
     }
@@ -32,7 +32,7 @@ public class OrderController {
     public String getOrder(@PathVariable(name = "id") Long id,
                            @RequestParam(name = "newOrder", required = false) String newOrder,
                            Model model) {
-        Order order = orderService.find(id);
+        OrderDto order = orderService.find(id);
         model.addAttribute("order", order);
         return "order";
     }

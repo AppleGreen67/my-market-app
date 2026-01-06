@@ -6,7 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.mymarket.domain.Item;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
-import ru.yandex.practicum.mymarket.mapper.ItemMapper;
+import ru.yandex.practicum.mymarket.mapper.ItemDtoMapper;
 import ru.yandex.practicum.mymarket.repository.ItemRepository;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class ItemsService {
 
 
         List<ItemDto> items = page.get()
-                .map(ItemMapper::mapp)
+                .map(ItemDtoMapper::mapp)
                 .toList();
 
         return partition(items, 3);
@@ -63,7 +63,7 @@ public class ItemsService {
         item.setCount(getCount(item.getCount(), action));
         itemRepository.save(item);
 
-        return ItemMapper.mapp(item);
+        return ItemDtoMapper.mapp(item);
     }
 
     private Integer getCount(Integer count, String action) {
@@ -83,12 +83,12 @@ public class ItemsService {
             throw new NoSuchElementException();
         }
 
-        return ItemMapper.mapp(itemOptional.get());
+        return ItemDtoMapper.mapp(itemOptional.get());
     }
 
 
     public List<ItemDto> getItems() {
         List<Item> items = itemRepository.findByCountGreaterThan(0);
-        return items.stream().map(ItemMapper::mapp).toList();
+        return items.stream().map(ItemDtoMapper::mapp).toList();
     }
 }

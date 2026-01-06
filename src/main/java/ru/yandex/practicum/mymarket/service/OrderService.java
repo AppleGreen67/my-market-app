@@ -1,26 +1,47 @@
 package ru.yandex.practicum.mymarket.service;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.mymarket.dto.ItemDto;
-import ru.yandex.practicum.mymarket.dto.Order;
+import ru.yandex.practicum.mymarket.domain.Order;
+import ru.yandex.practicum.mymarket.dto.OrderDto;
+import ru.yandex.practicum.mymarket.dto.OrderItemDto;
+import ru.yandex.practicum.mymarket.mapper.OrderItemDtoMapper;
+import ru.yandex.practicum.mymarket.repository.OrderRepository;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class OrderService {
-    public List<Order> getOrders() {
-        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title", "description", "imageUrl", 0L, 0),
-                new ItemDto(2L, "title1", "description1", "imageUrl", 0L, 0),
-                new ItemDto(2L, "title2", "description2", "imageUrl", 0L, 0));
-        return Arrays.asList(new Order(1L, items, 8907L));
+
+    private final OrderRepository orderRepository;
+
+    public OrderService(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
     }
 
-    public Order find(Long id) {
-        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title", "description", "imageUrl", 0L, 0),
-                new ItemDto(2L, "title1", "description1", "imageUrl", 0L, 0),
-                new ItemDto(2L, "title2", "description2", "imageUrl", 0L, 0));
+    public List<OrderDto> getOrders() {
+        List<Order> orders = orderRepository.findAll();
 
-        return new Order(1L, items, 8907L);
+        return orders.stream().map(order -> {
+            List<OrderItemDto> itemDtoList = order.getOrderItems().stream().map(OrderItemDtoMapper::mapp).toList();
+            return new OrderDto(order.getId(), itemDtoList, calculateSum(itemDtoList));
+        }).toList();
+    }
+
+    public OrderDto find(Long id) {
+        Optional<Order> orderOptional = orderRepository.findById(id);
+        if (orderOptional.isEmpty()) throw new NoSuchElementException();
+
+        Order order = orderOptional.get();
+        List<OrderItemDto> itemDtoList = order.getOrderItems().stream().map(OrderItemDtoMapper::mapp).toList();
+
+        return new OrderDto(order.getId(), itemDtoList, calculateSum(itemDtoList));
+    }
+
+    public Long calculateSum(List<OrderItemDto> items) {
+        if (items == null || items.isEmpty()) return 0L;
+
+        return items.stream().mapToLong(item -> item.price() * item.count()).sum();
     }
 }

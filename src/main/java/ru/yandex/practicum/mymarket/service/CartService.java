@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.mymarket.domain.Item;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
-import ru.yandex.practicum.mymarket.mapper.ItemMapper;
+import ru.yandex.practicum.mymarket.mapper.ItemDtoMapper;
 import ru.yandex.practicum.mymarket.repository.ItemRepository;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class CartService extends ItemsService {
 
     public List<ItemDto> getItems() {
         List<Item> items = itemRepository.findByCountGreaterThan(0);
-        return items.stream().map(ItemMapper::mapp).toList();
+        return items.stream().map(ItemDtoMapper::mapp).toList();
     }
 
     @Transactional

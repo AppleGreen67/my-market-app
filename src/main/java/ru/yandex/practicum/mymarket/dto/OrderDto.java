@@ -2,15 +2,15 @@ package ru.yandex.practicum.mymarket.dto;
 
 import java.util.List;
 
-public class Order {
+public class OrderDto {
     private Long id;
-    private List<ItemDto> items;
+    private List<OrderItemDto> items;
     private Long totalSum;
 
-    public Order() {
+    public OrderDto() {
     }
 
-    public Order(Long id, List<ItemDto> items, Long totalSum) {
+    public OrderDto(Long id, List<OrderItemDto> items, Long totalSum) {
         this.id = id;
         this.items = items;
         this.totalSum = totalSum;
@@ -28,15 +28,15 @@ public class Order {
         this.id = id;
     }
 
-    public List<ItemDto> getItems() {
+    public List<OrderItemDto> getItems() {
         return items;
     }
 
-    public List<ItemDto> items() {
+    public List<OrderItemDto> items() {
         return items;
     }
 
-    public void setItems(List<ItemDto> items) {
+    public void setItems(List<OrderItemDto> items) {
         this.items = items;
     }
 
