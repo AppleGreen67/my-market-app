@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.mymarket.dto.Item;
+import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.service.CartService;
 
 import java.util.Arrays;
@@ -43,9 +43,9 @@ class CartControllerTest {
 
     @Test
     void getCartItems() throws Exception {
-        List<Item> items = Arrays.asList(new Item(1L, "title1", "description1", "imageUrl", 11L, 111L),
-                new Item(2L, "title2", "description2", "imageUrl", 22L, 222L),
-                new Item(3L, "title3", "description3", "imageUrl", 33L, 333L));
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+                new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         when(cartService.getItems()).thenReturn(items);
         when(cartService.calculateSum(items)).thenReturn(8907L);

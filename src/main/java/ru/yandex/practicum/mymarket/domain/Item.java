@@ -19,7 +19,7 @@ public class Item {
     private String imgPath;
     private Long price;
     @Column(name = "item_count")
-    private Long count;
+    private Integer count;
 
     public Long getId() {
         return id;
@@ -61,11 +61,11 @@ public class Item {
         this.price = price;
     }
 
-    public Long getCount() {
+    public Integer getCount() {
         return count;
     }
 
-    public void setCount(Long count) {
+    public void setCount(Integer count) {
         this.count = count;
     }
 }

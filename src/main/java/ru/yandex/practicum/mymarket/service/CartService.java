@@ -1,26 +1,42 @@
 package ru.yandex.practicum.mymarket.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.mymarket.dto.Item;
+import ru.yandex.practicum.mymarket.domain.Item;
+import ru.yandex.practicum.mymarket.dto.ItemDto;
+import ru.yandex.practicum.mymarket.mapper.ItemMapper;
+import ru.yandex.practicum.mymarket.repository.ItemRepository;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
-public class CartService {
+public class CartService extends ItemsService {
 
-    public List<Item> getItems() {
-        return Arrays.asList(new Item(1L, "title", "description", "imageUrl", 0L, 0L),
-                new Item(2L, "title1", "description1", "imageUrl", 0L, 0L),
-                new Item(2L, "title2", "description2", "imageUrl", 0L, 0L));
+//    private final ItemRepository itemRepository;
+//
+//    public CartService(ItemRepository itemRepository) {
+//        this.itemRepository = itemRepository;
+//    }
+
+
+    public CartService(ItemRepository itemRepository) {
+        super(itemRepository);
     }
 
-    public List<Item> updateCount(Long id, String action) {
-        return Arrays.asList(new Item(1L, "title", "description", "imageUrl", 0L, 0L),
-                new Item(2L, "title2", "description2", "imageUrl", 0L, 0L));
+    public List<ItemDto> getItems() {
+        List<Item> items = itemRepository.findByCountGreaterThan(0);
+        return items.stream().map(ItemMapper::mapp).toList();
     }
 
-    public Long calculateSum(List<Item> items) {
-        return null;
+    @Transactional
+    public List<ItemDto> updateItemCountInCart(Long id, String action) {
+        updateCount(id, action);
+        return getItems();
+    }
+
+    public Long calculateSum(List<ItemDto> items) {
+        if (items == null || items.isEmpty()) return 0L;
+
+        return items.stream().mapToLong(item -> item.price() * item.count()).sum();
     }
 }

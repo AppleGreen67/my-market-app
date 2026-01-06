@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.yandex.practicum.mymarket.dto.Item;
+import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.dto.Paging;
 import ru.yandex.practicum.mymarket.service.ItemsService;
 
@@ -24,7 +24,6 @@ public class ItemsController {
         this.itemsService = itemsService;
     }
 
-    //    @GetMapping("/")
     @GetMapping
     public String getItems(@RequestParam(name = "search", required = false) String search,
                            @RequestParam(name = "sort", required = false) String sort,
@@ -39,7 +38,7 @@ public class ItemsController {
         Integer pageNumber = number == null ? 1 : Integer.parseInt(number);
         Integer pageSize = size == null ? 5 : Integer.parseInt(size);
 
-        List<List<Item>> itemsList = itemsService.getItems(search, sort, pageNumber, pageSize);
+        List<List<ItemDto>> itemsList = itemsService.getItems(search, sort, pageNumber, pageSize);
         model.addAttribute("items", itemsList);
 
         model.addAttribute("paging", new Paging(pageNumber, pageSize));
@@ -70,7 +69,7 @@ public class ItemsController {
 
     @GetMapping("/{id}")
     public String getItem(@PathVariable(name = "id") Long id, Model model) {
-        Item item = itemsService.find(id);
+        ItemDto item = itemsService.find(id);
         model.addAttribute("item", item);
         return "item";
     }
@@ -83,7 +82,7 @@ public class ItemsController {
             throw new UnsupportedOperationException();
         }
 
-        Item item = itemsService.updateCount(id, action);
+        ItemDto item = itemsService.updateCount(id, action);
         model.addAttribute("item", item);
         return "item";
     }

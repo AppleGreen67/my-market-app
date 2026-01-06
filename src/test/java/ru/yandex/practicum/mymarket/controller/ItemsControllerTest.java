@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.mymarket.dto.Item;
+import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.service.ItemsService;
 
 import java.util.Arrays;
@@ -44,13 +44,13 @@ class ItemsControllerTest {
 
     @Test
     void getItems() throws Exception {
-        List<Item> items = Arrays.asList(new Item(1L, "title1", "description1", "imageUrl", 11L, 111L),
-                new Item(2L, "title2", "description2", "imageUrl", 22L, 222L),
-                new Item(3L, "title3", "description3", "imageUrl", 33L, 333L));
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+                new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        List<Item> items1 = Arrays.asList(new Item(4L, "title4", "description4", "imageUrl", 44L, 444L),
-                new Item(5L, "title5", "description5", "imageUrl", 55L, 555L),
-                new Item(6L, "title6", "description6", "imageUrl", 66L, 666L));
+        List<ItemDto> items1 = Arrays.asList(new ItemDto(4L, "title4", "description4", "imageUrl", 44L, 444),
+                new ItemDto(5L, "title5", "description5", "imageUrl", 55L, 555),
+                new ItemDto(6L, "title6", "description6", "imageUrl", 66L, 666));
 
         when(itemsService.getItems(any(), any(), any(), any()))
                 .thenReturn(Arrays.asList(items, items1));
@@ -80,9 +80,9 @@ class ItemsControllerTest {
         Integer pageNumber = 2;
         Integer pageSize = 3;
 
-        List<Item> items = Arrays.asList(new Item(1L, "title1", "description1", "imageUrl", 11L, 111L),
-                new Item(2L, "title2", "description2", "imageUrl", 22L, 222L),
-                new Item(3L, "title3", "description3", "imageUrl", 33L, 333L));
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+                new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         when(itemsService.getItems(search, sort, pageNumber, pageSize))
                 .thenReturn(Arrays.asList(items));
@@ -104,9 +104,9 @@ class ItemsControllerTest {
     void getItems_sortIsNo() throws Exception {
         String sort = "NO";
 
-        List<Item> items = Arrays.asList(new Item(1L, "title1", "description1", "imageUrl", 11L, 111L),
-                new Item(2L, "title2", "description2", "imageUrl", 22L, 222L),
-                new Item(3L, "title3", "description3", "imageUrl", 33L, 333L));
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+                new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         when(itemsService.getItems(any(), eq(sort), any(), any()))
                 .thenReturn(Arrays.asList(items));
@@ -122,9 +122,9 @@ class ItemsControllerTest {
     void getItems_sortIsALPHA() throws Exception {
         String sort = "ALPHA";
 
-        List<Item> items = Arrays.asList(new Item(1L, "title1", "description1", "imageUrl", 11L, 111L),
-                new Item(2L, "title2", "description2", "imageUrl", 22L, 222L),
-                new Item(3L, "title3", "description3", "imageUrl", 33L, 333L));
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+                new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         when(itemsService.getItems(any(), eq(sort), any(), any()))
                 .thenReturn(Arrays.asList(items));
@@ -140,9 +140,9 @@ class ItemsControllerTest {
     void getItems_sortIsPRICE() throws Exception {
         String sort = "PRICE";
 
-        List<Item> items = Arrays.asList(new Item(1L, "title1", "description1", "imageUrl", 11L, 111L),
-                new Item(2L, "title2", "description2", "imageUrl", 22L, 222L),
-                new Item(3L, "title3", "description3", "imageUrl", 33L, 333L));
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+                new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         when(itemsService.getItems(any(), eq(sort), any(), any()))
                 .thenReturn(Arrays.asList(items));
@@ -178,7 +178,7 @@ class ItemsControllerTest {
         String action = "PLUS";
 
         when(itemsService.updateCount(id, action))
-                .thenReturn(new Item(1L, "title1", "description1", "imageUrl", 0L, 777L));
+                .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777));
 
         mockMvc.perform(post("/items?id={id}&action={action}", id, action))
                 .andExpect(status().is3xxRedirection())
@@ -193,7 +193,7 @@ class ItemsControllerTest {
         String action = "MINUS";
 
         when(itemsService.updateCount(id, action))
-                .thenReturn(new Item(1L, "title1", "description1", "imageUrl", 0L, 776L));
+                .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776));
 
         mockMvc.perform(post("/items?id={id}&action={action}", id, action))
                 .andExpect(status().is3xxRedirection())
@@ -222,7 +222,7 @@ class ItemsControllerTest {
         long id = 1L;
 
         when(itemsService.find(id))
-                .thenReturn(new Item(1L, "title1", "description1", "imageUrl", 0L, 0L));
+                .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 0));
 
         mockMvc.perform(get("/items/{id}", id))
                 .andExpect(status().isOk())
@@ -238,7 +238,7 @@ class ItemsControllerTest {
         String action = "PLUS";
 
         when(itemsService.updateCount(id, action))
-                .thenReturn(new Item(1L, "title1", "description1", "imageUrl", 0L, 777L));
+                .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777));
 
         mockMvc.perform(post("/items/{id}?action={action}", id, action))
                 .andExpect(status().isOk())
@@ -255,7 +255,7 @@ class ItemsControllerTest {
         String action = "MINUS";
 
         when(itemsService.updateCount(id, action))
-                .thenReturn(new Item(1L, "title1", "description1", "imageUrl", 0L, 776L));
+                .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776));
 
         mockMvc.perform(post("/items/{id}?action={action}", id, action))
                 .andExpect(status().isOk())

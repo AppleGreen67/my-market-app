@@ -4,7 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.mymarket.dto.Item;
+import ru.yandex.practicum.mymarket.domain.Item;
+import ru.yandex.practicum.mymarket.dto.ItemDto;
+import ru.yandex.practicum.mymarket.mapper.ItemMapper;
 import ru.yandex.practicum.mymarket.repository.ItemRepository;
 
 import java.util.List;
@@ -16,13 +18,13 @@ import java.util.stream.IntStream;
 @Service
 public class ItemsService {
 
-    private final ItemRepository itemRepository;
+    protected final ItemRepository itemRepository;
 
     public ItemsService(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
     }
 
-    public List<List<Item>> getItems(String search, String sort, Integer pageNumber, Integer pageSize) {
+    public List<List<ItemDto>> getItems(String search, String sort, Integer pageNumber, Integer pageSize) {
         PageRequest pageable;
         if ("ALPHA".equals(sort))
             pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.Direction.ASC, "title");
@@ -35,8 +37,9 @@ public class ItemsService {
         Page<ru.yandex.practicum.mymarket.domain.Item> page = search != null && !search.isEmpty() ?
                 itemRepository.findAllByTitleContainingOrDescriptionContaining(pageable, search, search) : itemRepository.findAll(pageable);
 
-        List<Item> items = page.get()
-                .map(item -> new Item(item.getId(), item.getTitle(), item.getDescription(), item.getImgPath(), item.getPrice(), 0L))
+
+        List<ItemDto> items = page.get()
+                .map(ItemMapper::mapp)
                 .toList();
 
         return partition(items, 3);
@@ -51,20 +54,41 @@ public class ItemsService {
                 .collect(Collectors.toList());
     }
 
+    public ItemDto updateCount(Long id, String action) {
+        Optional<Item> itemOptional = itemRepository.findById(id);
+        if (itemOptional.isEmpty()) throw new NoSuchElementException();
 
-    public Item updateCount(Long id, String action) {
-        //todo
-        return new Item(2L, "title1", "description1", "imageUrl", 0L, 0L);
+
+        Item item = itemOptional.get();
+        item.setCount(getCount(item.getCount(), action));
+        itemRepository.save(item);
+
+        return ItemMapper.mapp(item);
     }
 
-    public Item find(Long id) {
+    private Integer getCount(Integer count, String action) {
+        if ("MINUS".equals(action))
+            return count - 1;
+        else if ("PLUS".equals(action))
+            return count + 1;
+        else if ("DELETE".equals(action))
+            return 0;
+
+        throw new UnsupportedOperationException();
+    }
+
+    public ItemDto find(Long id) {
         Optional<ru.yandex.practicum.mymarket.domain.Item> itemOptional = itemRepository.findById(id);
         if (itemOptional.isEmpty()) {
             throw new NoSuchElementException();
         }
 
-        ru.yandex.practicum.mymarket.domain.Item item = itemOptional.get();
-        return new Item(item.getId(), item.getTitle(), item.getDescription(), item.getImgPath(), item.getPrice(), 0L);
+        return ItemMapper.mapp(itemOptional.get());
     }
 
+
+    public List<ItemDto> getItems() {
+        List<Item> items = itemRepository.findByCountGreaterThan(0);
+        return items.stream().map(ItemMapper::mapp).toList();
+    }
 }

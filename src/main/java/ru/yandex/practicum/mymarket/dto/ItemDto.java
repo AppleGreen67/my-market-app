@@ -1,17 +1,17 @@
 package ru.yandex.practicum.mymarket.dto;
 
-public class Item {
+public class ItemDto {
     private Long id;
     private String title;
     private String description;
     private String imgPath;
     private Long price;
-    private Long count;
+    private Integer count;
 
-    public Item() {
+    public ItemDto() {
     }
 
-    public Item(Long id, String title, String description, String imgPath, Long price, Long count) {
+    public ItemDto(Long id, String title, String description, String imgPath, Long price, Integer count) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -60,11 +60,11 @@ public class Item {
         this.price = price;
     }
 
-    public Long count() {
+    public Integer count() {
         return count;
     }
 
-    public void setCount(Long count) {
+    public void setCount(Integer count) {
         this.count = count;
     }
 }

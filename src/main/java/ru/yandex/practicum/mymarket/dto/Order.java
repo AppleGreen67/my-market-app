@@ -4,13 +4,13 @@ import java.util.List;
 
 public class Order {
     private Long id;
-    private List<Item> items;
+    private List<ItemDto> items;
     private Long totalSum;
 
     public Order() {
     }
 
-    public Order(Long id, List<Item> items, Long totalSum) {
+    public Order(Long id, List<ItemDto> items, Long totalSum) {
         this.id = id;
         this.items = items;
         this.totalSum = totalSum;
@@ -28,15 +28,15 @@ public class Order {
         this.id = id;
     }
 
-    public List<Item> getItems() {
+    public List<ItemDto> getItems() {
         return items;
     }
 
-    public List<Item> items() {
+    public List<ItemDto> items() {
         return items;
     }
 
-    public void setItems(List<Item> items) {
+    public void setItems(List<ItemDto> items) {
         this.items = items;
     }
 
