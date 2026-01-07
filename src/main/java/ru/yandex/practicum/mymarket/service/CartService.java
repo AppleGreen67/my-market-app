@@ -95,6 +95,6 @@ public class CartService {
     public Long calculateSum(List<ItemDto> items) {
         if (items == null || items.isEmpty()) return 0L;
 
-        return items.stream().mapToLong(item -> item.price() * item.count()).sum();
+        return items.stream().mapToLong(item -> item.getPrice() * item.getCount()).sum();
     }
 }

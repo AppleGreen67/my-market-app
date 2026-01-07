@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.mymarket.domain.Cart;
 import ru.yandex.practicum.mymarket.domain.CartItem;
+import ru.yandex.practicum.mymarket.domain.Item;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.mapper.ItemDtoMapper;
 import ru.yandex.practicum.mymarket.repository.CartRepository;
@@ -44,7 +45,7 @@ public class ItemsService {
             pageable = PageRequest.of(pageNumber - 1, pageSize);
 
 
-        Page<ru.yandex.practicum.mymarket.domain.Item> page = search != null && !search.isEmpty() ?
+        Page<Item> page = search != null && !search.isEmpty() ?
                 itemRepository.findAllByTitleContainingOrDescriptionContaining(pageable, search, search) : itemRepository.findAll(pageable);
 
         Optional<Cart> cartOptional = cartRepository.findByUserId(USER_ID);
@@ -70,13 +71,13 @@ public class ItemsService {
         List<ItemDto> itemDtoList = cartService.updateCart(id, action);
 
         return itemDtoList.stream()
-                .filter(itemDto -> Objects.equals(id, itemDto.id()))
+                .filter(itemDto -> Objects.equals(id, itemDto.getId()))
                 .findFirst().orElseThrow();
     }
 
     @Transactional
     public ItemDto find(Long id) {
-        Optional<ru.yandex.practicum.mymarket.domain.Item> itemOptional = itemRepository.findById(id);
+        Optional<Item> itemOptional = itemRepository.findById(id);
         if (itemOptional.isEmpty()) throw new NoSuchElementException();
 
         Optional<Cart> cartOptional = cartRepository.findByUserId(USER_ID);

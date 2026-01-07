@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
@@ -24,7 +23,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CartController.class)
@@ -62,52 +60,77 @@ class CartControllerTest {
         verify(cartService).calculateSum(items);
     }
 
-    //    @Test
+    @Test
     void changeCount_plus() throws Exception {
         long id = 1L;
         String action = "PLUS";
 
-//        when(cartService.updateCount(id, action))
-//                .thenReturn(new Item(1L, "title1", "description1", "imageUrl", 0L, 777L));
-        //todo
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+                new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
+
+        when(cartService.updateCart(id, action)).thenReturn(items);
+
+        when(cartService.calculateSum(items)).thenReturn(7777L);
 
         mockMvc.perform(post("/cart/items?id={id}&action={action}", id, action))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().stringValues(HttpHeaders.LOCATION, "/cart/items"));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<h5 class=\"card-title\">title1</h5>")))
+                .andExpect(content().string(containsString("<h5 class=\"card-title\">title2</h5>")))
+                .andExpect(content().string(containsString("<h5 class=\"card-title\">title3</h5>")))
+                .andExpect(content().string(containsString("Итого: 7777 руб.")))
+                .andExpect(content().contentType("text/html;charset=UTF-8"));
 
         verify(cartService).updateCart(id, action);
+        verify(cartService).calculateSum(items);
     }
 
-    //    @Test
+    @Test
     void changeCount_minus() throws Exception {
         long id = 1L;
         String action = "MINUS";
 
-//        when(cartService.updateCount(id, action))
-//                .thenReturn(new Item(1L, "title1", "description1", "imageUrl", 0L, 777L));
-        //todo
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+                new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
+
+        when(cartService.updateCart(id, action)).thenReturn(items);
+
+        when(cartService.calculateSum(items)).thenReturn(666L);
 
         mockMvc.perform(post("/cart/items?id={id}&action={action}", id, action))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().stringValues(HttpHeaders.LOCATION, "/cart/items"));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<h5 class=\"card-title\">title1</h5>")))
+                .andExpect(content().string(containsString("<h5 class=\"card-title\">title2</h5>")))
+                .andExpect(content().string(containsString("<h5 class=\"card-title\">title3</h5>")))
+                .andExpect(content().string(containsString("Итого: 666 руб.")))
+                .andExpect(content().contentType("text/html;charset=UTF-8"));
 
         verify(cartService).updateCart(id, action);
+        verify(cartService).calculateSum(items);
     }
 
-    //    @Test
+    @Test
     void changeCount_delete() throws Exception {
         long id = 1L;
         String action = "DELETE";
 
-//        when(cartService.updateCount(id, action))
-//                .thenReturn(new Item(1L, "title1", "description1", "imageUrl", 0L, 777L));
-        //todo
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
+
+        when(cartService.updateCart(id, action)).thenReturn(items);
+
+        when(cartService.calculateSum(items)).thenReturn(25L);
 
         mockMvc.perform(post("/cart/items?id={id}&action={action}", id, action))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().stringValues(HttpHeaders.LOCATION, "/cart/items"));
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<h5 class=\"card-title\">title1</h5>")))
+                .andExpect(content().string(containsString("<h5 class=\"card-title\">title3</h5>")))
+                .andExpect(content().string(containsString("Итого: 25 руб.")))
+                .andExpect(content().contentType("text/html;charset=UTF-8"));
 
         verify(cartService).updateCart(id, action);
+        verify(cartService).calculateSum(items);
     }
 
     @Test
@@ -125,8 +148,7 @@ class CartControllerTest {
             assertInstanceOf(UnsupportedOperationException.class, e.getCause());
         }
 
-        //todo verify
-//        verify(cartService, never()).updateCount(id, action);
+        verify(cartService, never()).updateCart(id, action);
         verify(cartService, never()).calculateSum(any());
     }
 }

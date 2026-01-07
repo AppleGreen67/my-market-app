@@ -20,12 +20,20 @@ public class ItemDto {
         this.count = count;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Long id() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String title() {
@@ -36,12 +44,20 @@ public class ItemDto {
         this.title = title;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     public String description() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getImgPath() {
+        return imgPath;
     }
 
     public String imgPath() {
@@ -52,12 +68,20 @@ public class ItemDto {
         this.imgPath = imgPath;
     }
 
+    public Long getPrice() {
+        return price;
+    }
+
     public Long price() {
         return price;
     }
 
     public void setPrice(Long price) {
         this.price = price;
+    }
+
+    public Integer getCount() {
+        return count;
     }
 
     public Integer count() {

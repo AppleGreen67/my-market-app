@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -172,6 +171,26 @@ class ItemsControllerTest {
         verify(itemsService, never()).getItems(any(), eq(sort), any(), any());
     }
 
+
+    @Test
+    void changeCount_allParams_plus() throws Exception {
+        long id = 1L;
+        String action = "PLUS";
+        String search = "descr";
+        String sort = "NO";
+        Integer pageNumber = 2;
+        Integer pageSize = 3;
+
+        when(itemsService.updateCountInCart(id, action))
+                .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777));
+
+        mockMvc.perform(post("/items?id={id}&action={action}&search={search}&sort={sort}&pageNumber={pageNumber}&pageSize={pageSize}",
+                        id, action, search, sort, pageNumber, pageSize))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(header().stringValues(HttpHeaders.LOCATION, "/items?search=descr&sort=NO&pageNumber=2&pageSize=3"));
+
+        verify(itemsService).updateCountInCart(id, action);
+    }
 
     @Test
     void changeCount_plus() throws Exception {
