@@ -2,36 +2,43 @@ package ru.yandex.practicum.mymarket.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.mymarket.domain.Item;
+import ru.yandex.practicum.mymarket.domain.Cart;
 import ru.yandex.practicum.mymarket.domain.Order;
 import ru.yandex.practicum.mymarket.domain.OrderItem;
-import ru.yandex.practicum.mymarket.repository.ItemRepository;
+import ru.yandex.practicum.mymarket.repository.CartRepository;
 import ru.yandex.practicum.mymarket.repository.OrderRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import static ru.yandex.practicum.mymarket.service.CartService.USER_ID;
 
 @Service
 public class BuyService {
 
-    private final ItemRepository itemRepository;
+    private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
 
-    public BuyService(ItemRepository itemRepository, OrderRepository orderRepository) {
-        this.itemRepository = itemRepository;
+    public BuyService(CartRepository cartRepository, OrderRepository orderRepository) {
+        this.cartRepository = cartRepository;
         this.orderRepository = orderRepository;
     }
 
     @Transactional
     public Long buy() {
-        List<Item> itemsInCart = itemRepository.findByCountGreaterThan(0);
+        Optional<Cart> cartOptional = cartRepository.findByUserId(USER_ID);
+        if (cartOptional.isEmpty()) throw new NoSuchElementException();
+
+        Cart cart = cartOptional.get();
 
         Order order = new Order();
 
-        List<OrderItem> orderItems = itemsInCart.stream()
-                .map(item -> {
+        List<OrderItem> orderItems = cart.getItems().stream()
+                .map(cartItem -> {
                     OrderItem orderItem = new OrderItem();
-                    orderItem.setItem(item);
-                    orderItem.setCount(item.getCount());
+                    orderItem.setItem(cartItem.getItem());
+                    orderItem.setCount(cartItem.getCount());
                     orderItem.setOrder(order);
                     return orderItem;
                 }).toList();
@@ -39,8 +46,8 @@ public class BuyService {
         order.setOrderItems(orderItems);
         orderRepository.save(order);
 
-        itemsInCart.forEach(item -> item.setCount(0));
-        itemRepository.saveAll(itemsInCart);
+        cart.getItems().clear();
+        cartRepository.save(cart);
 
         return order.getId();
     }
