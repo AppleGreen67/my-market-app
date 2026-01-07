@@ -62,7 +62,7 @@ class CartControllerTest {
         verify(cartService).calculateSum(items);
     }
 
-//    @Test
+    //    @Test
     void changeCount_plus() throws Exception {
         long id = 1L;
         String action = "PLUS";
@@ -78,7 +78,7 @@ class CartControllerTest {
         verify(cartService).updateCart(id, action);
     }
 
-//    @Test
+    //    @Test
     void changeCount_minus() throws Exception {
         long id = 1L;
         String action = "MINUS";
@@ -94,7 +94,7 @@ class CartControllerTest {
         verify(cartService).updateCart(id, action);
     }
 
-//    @Test
+    //    @Test
     void changeCount_delete() throws Exception {
         long id = 1L;
         String action = "DELETE";
@@ -115,9 +115,13 @@ class CartControllerTest {
         long id = 1L;
         String action = "unknown";
         try {
-            mockMvc.perform(post("/cart/items?id={id}&action={action}", id, action));
-            fail();
+            mockMvc.perform(post("/cart/items?id={id}&action={action}", id, action))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Error")))
+                    .andExpect(content().string(containsString("Сервис временно недоступен")))
+                    .andExpect(content().contentType("text/html;charset=UTF-8"));
         } catch (Exception e) {
+            fail();
             assertInstanceOf(UnsupportedOperationException.class, e.getCause());
         }
 

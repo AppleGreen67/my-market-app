@@ -161,10 +161,11 @@ class ItemsControllerTest {
         try {
             mockMvc.perform(get("/items?sort={sort}", sort))
                     .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Error")))
+                    .andExpect(content().string(containsString("Сервис временно недоступен")))
                     .andExpect(content().contentType("text/html;charset=UTF-8"));
-            fail();
         } catch (Exception e) {
-            assertInstanceOf(UnsupportedOperationException.class, e.getCause());
+            fail();
         }
 
 
@@ -208,10 +209,12 @@ class ItemsControllerTest {
         String action = "unknow";
 
         try {
-            mockMvc.perform(post("/items?id={id}&action={action}", id, action));
-            fail();
+            mockMvc.perform(post("/items?id={id}&action={action}", id, action)).andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Error")))
+                    .andExpect(content().string(containsString("Сервис временно недоступен")))
+                    .andExpect(content().contentType("text/html;charset=UTF-8"));
         } catch (Exception e) {
-            assertInstanceOf(UnsupportedOperationException.class, e.getCause());
+            fail();
         }
 
         verify(itemsService, never()).updateCountInCart(id, action);
@@ -272,10 +275,14 @@ class ItemsControllerTest {
         String action = "unknow";
 
         try {
-            mockMvc.perform(post("/items/{id}?action={action}", id, action));
-            fail();
+            mockMvc.perform(post("/items/{id}?action={action}", id, action))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Error")))
+                    .andExpect(content().string(containsString("Сервис временно недоступен")))
+                    .andExpect(content().contentType("text/html;charset=UTF-8"));
+
         } catch (Exception e) {
-            assertInstanceOf(UnsupportedOperationException.class, e.getCause());
+            fail();
         }
 
         verify(itemsService, never()).updateCountInCart(id, action);
