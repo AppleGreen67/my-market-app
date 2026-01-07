@@ -23,7 +23,7 @@ public class CartController {
 
     @GetMapping
     public String getCartItems(Model model) {
-        List<ItemDto> items = cartService.getItems();
+        List<ItemDto> items = cartService.getCartItems();
         model.addAttribute("items", items);
 
         Long totalSum = cartService.calculateSum(items);
@@ -40,7 +40,7 @@ public class CartController {
             throw new UnsupportedOperationException();
         }
 
-        List<ItemDto> items = cartService.updateItemCountInCart(id, action);
+        List<ItemDto> items = cartService.updateCart(id, action);
         model.addAttribute("items", items);
 
         Long totalSum = cartService.calculateSum(items);

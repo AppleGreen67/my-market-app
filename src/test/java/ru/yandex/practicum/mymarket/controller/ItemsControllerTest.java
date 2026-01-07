@@ -177,14 +177,14 @@ class ItemsControllerTest {
         long id = 1L;
         String action = "PLUS";
 
-        when(itemsService.updateCount(id, action))
+        when(itemsService.updateCountInCart(id, action))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777));
 
         mockMvc.perform(post("/items?id={id}&action={action}", id, action))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues(HttpHeaders.LOCATION, "/items"));
 
-        verify(itemsService).updateCount(id, action);
+        verify(itemsService).updateCountInCart(id, action);
     }
 
     @Test
@@ -192,14 +192,14 @@ class ItemsControllerTest {
         long id = 1L;
         String action = "MINUS";
 
-        when(itemsService.updateCount(id, action))
+        when(itemsService.updateCountInCart(id, action))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776));
 
         mockMvc.perform(post("/items?id={id}&action={action}", id, action))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues(HttpHeaders.LOCATION, "/items"));
 
-        verify(itemsService).updateCount(id, action);
+        verify(itemsService).updateCountInCart(id, action);
     }
 
     @Test
@@ -214,7 +214,7 @@ class ItemsControllerTest {
             assertInstanceOf(UnsupportedOperationException.class, e.getCause());
         }
 
-        verify(itemsService, never()).updateCount(id, action);
+        verify(itemsService, never()).updateCountInCart(id, action);
     }
 
     @Test
@@ -237,7 +237,7 @@ class ItemsControllerTest {
         long id = 1L;
         String action = "PLUS";
 
-        when(itemsService.updateCount(id, action))
+        when(itemsService.updateCountInCart(id, action))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777));
 
         mockMvc.perform(post("/items/{id}?action={action}", id, action))
@@ -246,7 +246,7 @@ class ItemsControllerTest {
                 .andExpect(content().string(containsString("<span>777</span>")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).updateCount(id, action);
+        verify(itemsService).updateCountInCart(id, action);
     }
 
     @Test
@@ -254,7 +254,7 @@ class ItemsControllerTest {
         long id = 1L;
         String action = "MINUS";
 
-        when(itemsService.updateCount(id, action))
+        when(itemsService.updateCountInCart(id, action))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776));
 
         mockMvc.perform(post("/items/{id}?action={action}", id, action))
@@ -263,7 +263,7 @@ class ItemsControllerTest {
                 .andExpect(content().string(containsString("<span>776</span>")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).updateCount(id, action);
+        verify(itemsService).updateCountInCart(id, action);
     }
 
     @Test
@@ -278,6 +278,6 @@ class ItemsControllerTest {
             assertInstanceOf(UnsupportedOperationException.class, e.getCause());
         }
 
-        verify(itemsService, never()).updateCount(id, action);
+        verify(itemsService, never()).updateCountInCart(id, action);
     }
 }

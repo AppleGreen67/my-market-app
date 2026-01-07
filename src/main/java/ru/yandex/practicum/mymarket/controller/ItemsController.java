@@ -58,13 +58,21 @@ public class ItemsController {
             throw new UnsupportedOperationException();
         }
 
-        itemsService.updateCount(id, action);
+        itemsService.updateCountInCart(id, action);
 
         redirectAttributes.addAttribute("search", search);
         redirectAttributes.addAttribute("sort", sort);
         redirectAttributes.addAttribute("pageNumber", pageNumber);
         redirectAttributes.addAttribute("pageSize", pageSize);
         return "redirect:/items";
+        //search=[search]&sort=[sort]&pageNumber=[pageNumber]&pageSize=[pageSize]
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("redirect:/items?");
+//        if (!search.isEmpty())
+//            sb.append("search=").append(search).append("&");
+//        if (!sort.isEmpty())
+//            sb.append("sort=").append(sort).append("&");
+//        return sb.substring(0, sb.length() - 1);
     }
 
     @GetMapping("/{id}")
@@ -82,7 +90,7 @@ public class ItemsController {
             throw new UnsupportedOperationException();
         }
 
-        ItemDto item = itemsService.updateCount(id, action);
+        ItemDto item = itemsService.updateCountInCart(id, action);
         model.addAttribute("item", item);
         return "item";
     }

@@ -47,7 +47,7 @@ class CartControllerTest {
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        when(cartService.getItems()).thenReturn(items);
+        when(cartService.getCartItems()).thenReturn(items);
         when(cartService.calculateSum(items)).thenReturn(8907L);
 
         mockMvc.perform(get("/cart/items"))
@@ -58,7 +58,7 @@ class CartControllerTest {
                 .andExpect(content().string(containsString("Итого: 8907 руб.")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(cartService).getItems();
+        verify(cartService).getCartItems();
         verify(cartService).calculateSum(items);
     }
 
@@ -75,7 +75,7 @@ class CartControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues(HttpHeaders.LOCATION, "/cart/items"));
 
-        verify(cartService).updateCount(id, action);
+        verify(cartService).updateCart(id, action);
     }
 
 //    @Test
@@ -91,7 +91,7 @@ class CartControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues(HttpHeaders.LOCATION, "/cart/items"));
 
-        verify(cartService).updateCount(id, action);
+        verify(cartService).updateCart(id, action);
     }
 
 //    @Test
@@ -107,7 +107,7 @@ class CartControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues(HttpHeaders.LOCATION, "/cart/items"));
 
-        verify(cartService).updateCount(id, action);
+        verify(cartService).updateCart(id, action);
     }
 
     @Test
