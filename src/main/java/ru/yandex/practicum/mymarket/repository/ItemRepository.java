@@ -5,11 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.yandex.practicum.mymarket.domain.Item;
 
-import java.util.List;
-
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Page<Item> findAllByTitleContainingOrDescriptionContaining(Pageable pageable, String title, String description);
 
-    List<Item> findByCountGreaterThan(int count);
 }

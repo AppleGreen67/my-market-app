@@ -75,7 +75,7 @@ public class CartService {
                 .map(ItemDtoMapper::mapp).toList();
     }
 
-    private Optional<CartItem> findCartItemByItem(Cart cart, Long itemId) {
+    public Optional<CartItem> findCartItemByItem(Cart cart, Long itemId) {
         return cart.getItems().stream()
                 .filter(cartItem -> cartItem.getItem().getId().equals(itemId))
                 .findFirst();

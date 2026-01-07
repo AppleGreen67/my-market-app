@@ -7,11 +7,14 @@ import ru.yandex.practicum.mymarket.dto.ItemDto;
 public class ItemDtoMapper {
 
     public static ItemDto mapp(Item item) {
-        return new ItemDto(item.getId(), item.getTitle(), item.getDescription(), item.getImgPath(), item.getPrice(), item.getCount());
+        return mapp(item, 0);
     }
 
     public static ItemDto mapp(CartItem cartItem) {
-        Item item = cartItem.getItem();
-        return new ItemDto(item.getId(), item.getTitle(), item.getDescription(), item.getImgPath(), item.getPrice(), cartItem.getCount());
+        return mapp(cartItem.getItem(), cartItem.getCount());
+    }
+
+    private static ItemDto mapp(Item item, Integer count) {
+        return new ItemDto(item.getId(), item.getTitle(), item.getDescription(), item.getImgPath(), item.getPrice(), count);
     }
 }
