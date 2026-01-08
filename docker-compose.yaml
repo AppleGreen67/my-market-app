@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  market:
+    container_name: market_c
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
