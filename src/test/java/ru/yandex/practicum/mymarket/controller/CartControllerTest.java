@@ -8,6 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.service.CartService;
+import ru.yandex.practicum.mymarket.service.SumService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +31,8 @@ class CartControllerTest {
 
     @MockitoBean
     private CartService cartService;
+    @MockitoBean
+    private SumService sumService;;
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,7 +49,8 @@ class CartControllerTest {
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         when(cartService.getCartItems()).thenReturn(items);
-        when(cartService.calculateSum(items)).thenReturn(8907L);
+
+        when(sumService.calculateSum(items)).thenReturn(8907L);
 
         mockMvc.perform(get("/cart/items"))
                 .andExpect(status().isOk())
@@ -57,7 +61,7 @@ class CartControllerTest {
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
         verify(cartService).getCartItems();
-        verify(cartService).calculateSum(items);
+        verify(sumService).calculateSum(items);
     }
 
     @Test
@@ -71,7 +75,7 @@ class CartControllerTest {
 
         when(cartService.updateCart(id, action)).thenReturn(items);
 
-        when(cartService.calculateSum(items)).thenReturn(7777L);
+        when(sumService.calculateSum(items)).thenReturn(7777L);
 
         mockMvc.perform(post("/cart/items?id={id}&action={action}", id, action))
                 .andExpect(status().isOk())
@@ -82,7 +86,7 @@ class CartControllerTest {
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
         verify(cartService).updateCart(id, action);
-        verify(cartService).calculateSum(items);
+        verify(sumService).calculateSum(items);
     }
 
     @Test
@@ -96,7 +100,7 @@ class CartControllerTest {
 
         when(cartService.updateCart(id, action)).thenReturn(items);
 
-        when(cartService.calculateSum(items)).thenReturn(666L);
+        when(sumService.calculateSum(items)).thenReturn(666L);
 
         mockMvc.perform(post("/cart/items?id={id}&action={action}", id, action))
                 .andExpect(status().isOk())
@@ -107,7 +111,7 @@ class CartControllerTest {
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
         verify(cartService).updateCart(id, action);
-        verify(cartService).calculateSum(items);
+        verify(sumService).calculateSum(items);
     }
 
     @Test
@@ -120,7 +124,7 @@ class CartControllerTest {
 
         when(cartService.updateCart(id, action)).thenReturn(items);
 
-        when(cartService.calculateSum(items)).thenReturn(25L);
+        when(sumService.calculateSum(items)).thenReturn(25L);
 
         mockMvc.perform(post("/cart/items?id={id}&action={action}", id, action))
                 .andExpect(status().isOk())
@@ -130,7 +134,7 @@ class CartControllerTest {
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
         verify(cartService).updateCart(id, action);
-        verify(cartService).calculateSum(items);
+        verify(sumService).calculateSum(items);
     }
 
     @Test
@@ -149,6 +153,6 @@ class CartControllerTest {
         }
 
         verify(cartService, never()).updateCart(id, action);
-        verify(cartService, never()).calculateSum(any());
+        verify(sumService, never()).calculateSum(any());
     }
 }

@@ -76,7 +76,7 @@ public class CartService {
     }
 
     public Optional<CartItem> findCartItemByItem(Cart cart, Long itemId) {
-        return cart.getItems().stream()
+         return cart.getItems().stream()
                 .filter(cartItem -> cartItem.getItem().getId().equals(itemId))
                 .findFirst();
     }
@@ -92,9 +92,4 @@ public class CartService {
         throw new UnsupportedOperationException();
     }
 
-    public Long calculateSum(List<ItemDto> items) {
-        if (items == null || items.isEmpty()) return 0L;
-
-        return items.stream().mapToLong(item -> item.getPrice() * item.getCount()).sum();
-    }
 }

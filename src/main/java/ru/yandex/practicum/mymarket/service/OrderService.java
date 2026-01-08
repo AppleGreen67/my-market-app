@@ -14,9 +14,11 @@ import java.util.Optional;
 @Service
 public class OrderService {
 
+    private final SumService sumService;
     private final OrderRepository orderRepository;
 
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(SumService sumService, OrderRepository orderRepository) {
+        this.sumService = sumService;
         this.orderRepository = orderRepository;
     }
 
@@ -25,7 +27,7 @@ public class OrderService {
 
         return orders.stream().map(order -> {
             List<OrderItemDto> itemDtoList = order.getOrderItems().stream().map(OrderItemDtoMapper::mapp).toList();
-            return new OrderDto(order.getId(), itemDtoList, calculateSum(itemDtoList));
+            return new OrderDto(order.getId(), itemDtoList, sumService.calculateSum(itemDtoList));
         }).toList();
     }
 
@@ -36,12 +38,7 @@ public class OrderService {
         Order order = orderOptional.get();
         List<OrderItemDto> itemDtoList = order.getOrderItems().stream().map(OrderItemDtoMapper::mapp).toList();
 
-        return new OrderDto(order.getId(), itemDtoList, calculateSum(itemDtoList));
+        return new OrderDto(order.getId(), itemDtoList, sumService.calculateSum(itemDtoList));
     }
 
-    public Long calculateSum(List<OrderItemDto> items) {
-        if (items == null || items.isEmpty()) return 0L;
-
-        return items.stream().mapToLong(item -> item.price() * item.count()).sum();
-    }
 }

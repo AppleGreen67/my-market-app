@@ -1,6 +1,6 @@
 package ru.yandex.practicum.mymarket.dto;
 
-public class ItemDto {
+public class ItemDto implements IItem {
     private Long id;
     private String title;
     private String description;

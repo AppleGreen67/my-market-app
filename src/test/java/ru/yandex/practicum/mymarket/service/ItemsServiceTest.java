@@ -31,6 +31,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.yandex.practicum.mymarket.service.CartService.USER_ID;
+import static ru.yandex.practicum.mymarket.utils.ItemsUtils.getItem;
 
 @SpringBootTest(classes = ItemsService.class)
 class ItemsServiceTest {
@@ -85,9 +86,9 @@ class ItemsServiceTest {
     }
 
     @Test
-    void getItems_noCart_search() {
-        String search = "this";
-        String sort = "ALPHA";
+    void getItems_noCart_noSearchAndPageAndPrice() {
+        String search = "";
+        String sort = "PRICE";
         Integer pageNumber = 1;
         Integer pageSize = 3;
 
@@ -95,14 +96,14 @@ class ItemsServiceTest {
             PageRequest pageable = in.getArgument(0);
             assertEquals(0, pageable.getPageNumber());
             assertEquals(3, pageable.getPageSize());
-            assertEquals(Sort.by( Sort.Direction.ASC, "title"), pageable.getSort());
+            assertEquals(Sort.by( Sort.Direction.ASC, "price"), pageable.getSort());
 
             List<Item> items = Arrays.asList(
                     getItem(2L,"title2 this", "description2", "imagePath", 0),
                     getItem(3L,"title3", "description3 this", "imagePath", 0));
 
             return new PageImpl(items);
-        }).when(itemRepository).findAllByTitleContainingOrDescriptionContaining(any(PageRequest.class), eq(search), eq(search));
+        }).when(itemRepository).findAll(any(PageRequest.class));
 
         when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
 
@@ -111,8 +112,8 @@ class ItemsServiceTest {
         assertEquals(1, itemDtoList.size());
         assertEquals(2, itemDtoList.get(0).size());
 
-        verify(itemRepository).findAllByTitleContainingOrDescriptionContaining(any(PageRequest.class), eq(search), eq(search));
-        verify(itemRepository, never()).findAll(any(PageRequest.class));
+        verify(itemRepository).findAll(any(PageRequest.class));
+        verify(itemRepository, never()).findAllByTitleContainingOrDescriptionContaining(any(PageRequest.class), eq(search), eq(search));
         verify(cartRepository).findByUserId(USER_ID);
     }
 
@@ -123,24 +124,20 @@ class ItemsServiceTest {
         Integer pageNumber = 1;
         Integer pageSize = 3;
 
-        List<Item> items = Arrays.asList(getItem(1L,"title1", "description2", "imagePath", 0),
+        doAnswer(in -> {
+            PageRequest pageable = in.getArgument(0);
+            assertEquals(0, pageable.getPageNumber());
+            assertEquals(3, pageable.getPageSize());
+            assertEquals(Sort.unsorted(), pageable.getSort());
+
+            List<Item> items = Arrays.asList(getItem(1L,"title1", "description2", "imagePath", 0),
                     getItem(2L,"title2", "description2", "imagePath", 0),
                     getItem(3L,"title3", "description3", "imagePath", 0),
                     getItem(4L,"title4", "description4", "imagePath", 0),
                     getItem(5L,"title5", "description5", "imagePath", 0));
 
-//        doAnswer(in -> {
-//            List<Item> objects = Arrays.asList(getItem(1L,"title1", "description2", "imagePath", 0),
-//                    getItem(2L,"title2", "description2", "imagePath", 0),
-//                    getItem(3L,"title2", "description3", "imagePath", 0),
-//                    getItem(4L,"title2", "description4", "imagePath", 0),
-//                    getItem(5L,"title2", "description5", "imagePath", 0),
-//                    getItem(6L,"title2", "description6", "imagePath", 0)
-//            );
-//            return new PageImpl(objects);
-//        }).when(itemRepository).findAll(any(PageRequest.class));
-        when(itemRepository.findAll(any(PageRequest.class))).thenReturn(new PageImpl(items));
-
+            return new PageImpl(items);
+        }).when(itemRepository).findAll(any(PageRequest.class));
         when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
 
 
@@ -348,13 +345,4 @@ class ItemsServiceTest {
         verify(cartRepository).findByUserId(USER_ID);
     }
 
-    private Item getItem(long id, String title2, String description2, String imagePath, long price) {
-        Item item = new Item();
-        item.setId(id);
-        item.setTitle(title2);
-        item.setDescription(description2);
-        item.setImgPath(imagePath);
-        item.setPrice(price);
-        return item;
-    }
 }
