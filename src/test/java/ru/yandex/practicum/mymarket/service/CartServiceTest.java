@@ -12,18 +12,18 @@ import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.repository.CartRepository;
 import ru.yandex.practicum.mymarket.repository.ItemRepository;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.yandex.practicum.mymarket.service.CartService.USER_ID;
 import static ru.yandex.practicum.mymarket.utils.ItemsUtils.getItem;
 
 @SpringBootTest(classes = CartService.class)
@@ -45,14 +45,18 @@ class CartServiceTest {
 
     @Test
     void getCartItems_noCart() {
-        when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
+        Long userId = 1L;
 
-        List<ItemDto> cartItems = service.getCartItems();
+        when(cartRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+        List<ItemDto> cartItems = service.getCartItems(userId);
         assertEquals(0, cartItems.size());
     }
 
     @Test
     void getCartItems() {
+        Long userId = 1L;
+
         CartItem cartItem = new CartItem();
         cartItem.setId(1L);
         cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
@@ -61,9 +65,9 @@ class CartServiceTest {
         Cart cart = new Cart();
         cart.getItems().add(cartItem);
 
-        when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
 
-        List<ItemDto> cartItems = service.getCartItems();
+        List<ItemDto> cartItems = service.getCartItems(userId);
         assertEquals(1, cartItems.size());
         assertEquals(2L, cartItems.getFirst().getId());
         assertEquals("title2", cartItems.getFirst().getTitle());
@@ -74,27 +78,31 @@ class CartServiceTest {
 
     @Test
     void updateCart_noCart() {
+        Long userId = 1L;
+
         Long id = 1L;
         String action = "PLUS";
 
-        when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
+        when(cartRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
         Item item = getItem(1L, "title1", "description1", "imagePath", 4);
         when(itemRepository.findById(id)).thenReturn(Optional.of(item));
 
 
-        List<ItemDto> itemDtoList = service.updateCart(id, action);
+        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
         assertEquals(1, itemDtoList.size());
-        assertEquals(1, itemDtoList.get(0).getId());
-        assertEquals(1, itemDtoList.get(0).getCount());
+        assertEquals(1, itemDtoList.getFirst().getId());
+        assertEquals(1, itemDtoList.getFirst().getCount());
 
-        verify(cartRepository).findByUserId(USER_ID);
+        verify(cartRepository).findByUserId(userId);
         verify(itemRepository).findById(id);
         verify(cartRepository, times(2)).save(any(Cart.class));
     }
 
     @Test
     void updateCart_noCartItem() {
+        Long userId = 1L;
+
         Long id = 1L;
         String action = "PLUS";
 
@@ -106,13 +114,13 @@ class CartServiceTest {
         Cart cart = new Cart();
         cart.getItems().add(cartItem);
 
-        when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
 
         Item item = getItem(1L, "title1", "description1", "imagePath", 4);
         when(itemRepository.findById(id)).thenReturn(Optional.of(item));
 
 
-        List<ItemDto> itemDtoList = service.updateCart(id, action);
+        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
         assertEquals(2, itemDtoList.size());
         assertEquals(2, itemDtoList.get(0).getId());
         assertEquals(3, itemDtoList.get(0).getCount());
@@ -120,13 +128,15 @@ class CartServiceTest {
         assertEquals(1, itemDtoList.get(1).getId());
         assertEquals(1, itemDtoList.get(1).getCount());
 
-        verify(cartRepository).findByUserId(USER_ID);
+        verify(cartRepository).findByUserId(userId);
         verify(itemRepository).findById(id);
         verify(cartRepository, times(1)).save(any(Cart.class));
     }
 
     @Test
     void updateCart_plus() {
+        Long userId = 1L;
+
         Long id = 2L;
         String action = "PLUS";
 
@@ -138,20 +148,22 @@ class CartServiceTest {
         Cart cart = new Cart();
         cart.getItems().add(cartItem);
 
-        when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
 
-        List<ItemDto> itemDtoList = service.updateCart(id, action);
+        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
         assertEquals(1, itemDtoList.size());
         assertEquals(2, itemDtoList.getFirst().getId());
         assertEquals(4, itemDtoList.getFirst().getCount());
 
-        verify(cartRepository).findByUserId(USER_ID);
+        verify(cartRepository).findByUserId(userId);
         verify(itemRepository, never()).findById(id);
         verify(cartRepository, times(1)).save(any(Cart.class));
     }
 
     @Test
     void updateCart_minus() {
+        Long userId = 1L;
+
         Long id = 2L;
         String action = "MINUS";
 
@@ -163,20 +175,22 @@ class CartServiceTest {
         Cart cart = new Cart();
         cart.getItems().add(cartItem);
 
-        when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
 
-        List<ItemDto> itemDtoList = service.updateCart(id, action);
+        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
         assertEquals(1, itemDtoList.size());
         assertEquals(2, itemDtoList.getFirst().getId());
         assertEquals(2, itemDtoList.getFirst().getCount());
 
-        verify(cartRepository).findByUserId(USER_ID);
+        verify(cartRepository).findByUserId(userId);
         verify(itemRepository, never()).findById(id);
         verify(cartRepository, times(1)).save(any(Cart.class));
     }
 
     @Test
     void updateCart_delete() {
+        Long userId = 1L;
+
         Long id = 2L;
         String action = "DELETE";
 
@@ -188,12 +202,12 @@ class CartServiceTest {
         Cart cart = new Cart();
         cart.getItems().add(cartItem);
 
-        when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
 
-        List<ItemDto> itemDtoList = service.updateCart(id, action);
+        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
         assertEquals(0, itemDtoList.size());
 
-        verify(cartRepository).findByUserId(USER_ID);
+        verify(cartRepository).findByUserId(userId);
         verify(itemRepository, never()).findById(id);
         verify(cartRepository, times(1)).save(any(Cart.class));
     }

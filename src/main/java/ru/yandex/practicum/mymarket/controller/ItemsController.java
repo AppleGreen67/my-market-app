@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.dto.Paging;
 import ru.yandex.practicum.mymarket.service.ItemsService;
+import ru.yandex.practicum.mymarket.service.user.IUserService;
 
 import java.util.List;
 
@@ -19,9 +20,11 @@ import java.util.List;
 public class ItemsController {
 
     private final ItemsService itemsService;
+    private final IUserService userService;
 
-    public ItemsController(ItemsService itemsService) {
+    public ItemsController(ItemsService itemsService, IUserService userService) {
         this.itemsService = itemsService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -35,10 +38,12 @@ public class ItemsController {
             throw new UnsupportedOperationException();
         }
 
+        Long userId = userService.getCurrentUserId();
+
         Integer pageNumber = number == null ? 1 : Integer.parseInt(number);
         Integer pageSize = size == null ? 5 : Integer.parseInt(size);
 
-        List<List<ItemDto>> itemsList = itemsService.getItems(search, sort, pageNumber, pageSize);
+        List<List<ItemDto>> itemsList = itemsService.getItems(userId, search, sort, pageNumber, pageSize);
         model.addAttribute("items", itemsList);
 
         model.addAttribute("paging", new Paging(pageNumber, pageSize));
@@ -58,7 +63,9 @@ public class ItemsController {
             throw new UnsupportedOperationException();
         }
 
-        itemsService.updateCountInCart(id, action);
+        Long userId = userService.getCurrentUserId();
+
+        itemsService.updateCountInCart(id, action, userId);
 
         redirectAttributes.addAttribute("search", search);
         redirectAttributes.addAttribute("sort", sort);
@@ -69,7 +76,8 @@ public class ItemsController {
 
     @GetMapping("/{id}")
     public String getItem(@PathVariable(name = "id") Long id, Model model) {
-        ItemDto item = itemsService.find(id);
+        Long userId = userService.getCurrentUserId();
+        ItemDto item = itemsService.find(id, userId);
         model.addAttribute("item", item);
         return "item";
     }
@@ -82,7 +90,9 @@ public class ItemsController {
             throw new UnsupportedOperationException();
         }
 
-        ItemDto item = itemsService.updateCountInCart(id, action);
+        Long userId = userService.getCurrentUserId();
+
+        ItemDto item = itemsService.updateCountInCart(id, action, userId);
         model.addAttribute("item", item);
         return "item";
     }

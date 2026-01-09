@@ -21,7 +21,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.yandex.practicum.mymarket.service.CartService.USER_ID;
 import static ru.yandex.practicum.mymarket.utils.ItemsUtils.getItem;
 
 @SpringBootTest(classes = BuyService.class)
@@ -37,20 +36,24 @@ class BuyServiceTest {
 
     @Test
     void buy_noCart_exception() {
+        Long userId = 1L;
+
         try {
-            service.buy();
+            service.buy(userId);
             fail();
         } catch (Exception e) {
             assertInstanceOf(NoSuchElementException.class, e);
         }
 
-        verify(cartRepository).findByUserId(USER_ID);
+        verify(cartRepository).findByUserId(userId);
         verify(orderRepository, never()).save(any());
         verify(cartRepository, never()).save(any());
     }
 
     @Test
     void buy() {
+        Long userId = 1L;
+
         CartItem cartItem = new CartItem();
         cartItem.setId(1L);
         cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
@@ -59,7 +62,7 @@ class BuyServiceTest {
         Cart cart = new Cart();
         cart.getItems().add(cartItem);
 
-        when(cartRepository.findByUserId(USER_ID)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
 
         doAnswer(in -> {
             Order orderInSave = in.getArgument(0);
@@ -79,9 +82,9 @@ class BuyServiceTest {
             return cartInSave;
         }).when(cartRepository).save(any(Cart.class));
 
-        Long orderId = service.buy();
+        Long orderId = service.buy(userId);
         assertEquals(1, orderId);
 
-        verify(cartRepository).findByUserId(USER_ID);
+        verify(cartRepository).findByUserId(userId);
     }
 }

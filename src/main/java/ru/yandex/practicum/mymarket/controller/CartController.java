@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.service.CartService;
 import ru.yandex.practicum.mymarket.service.SumService;
+import ru.yandex.practicum.mymarket.service.user.IUserService;
 
 import java.util.List;
 
@@ -17,16 +18,20 @@ import java.util.List;
 public class CartController {
 
     private final CartService cartService;
+    private final IUserService userService;
     private final SumService sumService;
 
-    public CartController(CartService cartService, SumService sumService) {
+    public CartController(CartService cartService, IUserService userService, SumService sumService) {
         this.cartService = cartService;
+        this.userService = userService;
         this.sumService = sumService;
     }
 
     @GetMapping
     public String getCartItems(Model model) {
-        List<ItemDto> items = cartService.getCartItems();
+        Long userId = userService.getCurrentUserId();
+
+        List<ItemDto> items = cartService.getCartItems(userId);
         model.addAttribute("items", items);
 
         Long totalSum = sumService.calculateSum(items);
@@ -43,7 +48,9 @@ public class CartController {
             throw new UnsupportedOperationException();
         }
 
-        List<ItemDto> items = cartService.updateCart(id, action);
+        Long userId = userService.getCurrentUserId();
+
+        List<ItemDto> items = cartService.updateCart(id, action, userId);
         model.addAttribute("items", items);
 
         Long totalSum = sumService.calculateSum(items);

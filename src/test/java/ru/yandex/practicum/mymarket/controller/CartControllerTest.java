@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.service.CartService;
 import ru.yandex.practicum.mymarket.service.SumService;
+import ru.yandex.practicum.mymarket.service.user.IUserService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +18,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -32,7 +34,9 @@ class CartControllerTest {
     @MockitoBean
     private CartService cartService;
     @MockitoBean
-    private SumService sumService;;
+    private IUserService userService;
+    @MockitoBean
+    private SumService sumService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,6 +44,7 @@ class CartControllerTest {
     @BeforeEach
     void beforeTest() {
         clearInvocations(cartService);
+        clearInvocations(userService);
     }
 
     @Test
@@ -48,7 +53,10 @@ class CartControllerTest {
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        when(cartService.getCartItems()).thenReturn(items);
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(cartService.getCartItems(userId)).thenReturn(items);
 
         when(sumService.calculateSum(items)).thenReturn(8907L);
 
@@ -60,7 +68,8 @@ class CartControllerTest {
                 .andExpect(content().string(containsString("Итого: 8907 руб.")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(cartService).getCartItems();
+        verify(userService).getCurrentUserId();
+        verify(cartService).getCartItems(userId);
         verify(sumService).calculateSum(items);
     }
 
@@ -73,7 +82,10 @@ class CartControllerTest {
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        when(cartService.updateCart(id, action)).thenReturn(items);
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(cartService.updateCart(id, action, userId)).thenReturn(items);
 
         when(sumService.calculateSum(items)).thenReturn(7777L);
 
@@ -85,7 +97,8 @@ class CartControllerTest {
                 .andExpect(content().string(containsString("Итого: 7777 руб.")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(cartService).updateCart(id, action);
+        verify(userService).getCurrentUserId();
+        verify(cartService).updateCart(id, action, userId);
         verify(sumService).calculateSum(items);
     }
 
@@ -98,7 +111,10 @@ class CartControllerTest {
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        when(cartService.updateCart(id, action)).thenReturn(items);
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(cartService.updateCart(id, action, userId)).thenReturn(items);
 
         when(sumService.calculateSum(items)).thenReturn(666L);
 
@@ -110,7 +126,8 @@ class CartControllerTest {
                 .andExpect(content().string(containsString("Итого: 666 руб.")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(cartService).updateCart(id, action);
+        verify(userService).getCurrentUserId();
+        verify(cartService).updateCart(id, action, userId);
         verify(sumService).calculateSum(items);
     }
 
@@ -122,7 +139,10 @@ class CartControllerTest {
         List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        when(cartService.updateCart(id, action)).thenReturn(items);
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(cartService.updateCart(id, action, userId)).thenReturn(items);
 
         when(sumService.calculateSum(items)).thenReturn(25L);
 
@@ -133,7 +153,8 @@ class CartControllerTest {
                 .andExpect(content().string(containsString("Итого: 25 руб.")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(cartService).updateCart(id, action);
+        verify(userService).getCurrentUserId();
+        verify(cartService).updateCart(id, action, userId);
         verify(sumService).calculateSum(items);
     }
 
@@ -152,7 +173,8 @@ class CartControllerTest {
             assertInstanceOf(UnsupportedOperationException.class, e.getCause());
         }
 
-        verify(cartService, never()).updateCart(id, action);
+        verify(userService, never()).getCurrentUserId();
+        verify(cartService, never()).updateCart(eq(id), eq(action), any());
         verify(sumService, never()).calculateSum(any());
     }
 }

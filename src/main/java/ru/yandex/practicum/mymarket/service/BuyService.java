@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static ru.yandex.practicum.mymarket.service.CartService.USER_ID;
-
 @Service
 public class BuyService {
 
@@ -26,8 +24,8 @@ public class BuyService {
     }
 
     @Transactional
-    public Long buy() {
-        Optional<Cart> cartOptional = cartRepository.findByUserId(USER_ID);
+    public Long buy(Long userId) {
+        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
         if (cartOptional.isEmpty()) throw new NoSuchElementException();
 
         Cart cart = cartOptional.get();

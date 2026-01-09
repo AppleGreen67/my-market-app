@@ -18,8 +18,6 @@ import java.util.Optional;
 @Service
 public class CartService {
 
-    public static final long USER_ID = 1L;
-
     private final CartRepository cartRepository;
     private final ItemRepository itemRepository;
 
@@ -28,8 +26,8 @@ public class CartService {
         this.itemRepository = itemRepository;
     }
 
-    public List<ItemDto> getCartItems() {
-        Optional<Cart> cartOptional = cartRepository.findByUserId(USER_ID);
+    public List<ItemDto> getCartItems(Long userId) {
+        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
 
         return cartOptional.map(cart -> cart.getItems().stream()
                 .map(ItemDtoMapper::mapp).toList()).orElseGet(ArrayList::new);
@@ -37,12 +35,12 @@ public class CartService {
     }
 
     @Transactional
-    public List<ItemDto> updateCart(Long id, String action) {
-        Optional<Cart> cartOptional = cartRepository.findByUserId(USER_ID);
+    public List<ItemDto> updateCart(Long id, String action, Long userId) {
+        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
         Cart cart;
         if (cartOptional.isEmpty()) {
             cart = new Cart();
-            cart.setUserId(USER_ID);
+            cart.setUserId(userId);
             cartRepository.save(cart);
         } else {
             cart = cartOptional.get();
@@ -76,7 +74,7 @@ public class CartService {
     }
 
     public Optional<CartItem> findCartItemByItem(Cart cart, Long itemId) {
-         return cart.getItems().stream()
+        return cart.getItems().stream()
                 .filter(cartItem -> cartItem.getItem().getId().equals(itemId))
                 .findFirst();
     }

@@ -9,6 +9,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.service.ItemsService;
+import ru.yandex.practicum.mymarket.service.user.IUserService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +33,8 @@ class ItemsControllerTest {
 
     @MockitoBean
     private ItemsService itemsService;
+    @MockitoBean
+    private IUserService userService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,6 +42,7 @@ class ItemsControllerTest {
     @BeforeEach
     void beforeTest() {
         clearInvocations(itemsService);
+        clearInvocations(userService);
     }
 
     @Test
@@ -51,7 +55,10 @@ class ItemsControllerTest {
                 new ItemDto(5L, "title5", "description5", "imageUrl", 55L, 555),
                 new ItemDto(6L, "title6", "description6", "imageUrl", 66L, 666));
 
-        when(itemsService.getItems(any(), any(), any(), any()))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.getItems(eq(userId), any(), any(), any(), any()))
                 .thenReturn(Arrays.asList(items, items1));
 
         mockMvc.perform(get("/items"))
@@ -69,7 +76,8 @@ class ItemsControllerTest {
                 .andExpect(content().string(containsString("<span>666</span>")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).getItems(any(), any(), any(), any());
+        verify(userService).getCurrentUserId();
+        verify(itemsService).getItems(eq(userId), any(), any(), any(), any());
     }
 
     @Test
@@ -83,7 +91,10 @@ class ItemsControllerTest {
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        when(itemsService.getItems(search, sort, pageNumber, pageSize))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.getItems(userId, search, sort, pageNumber, pageSize))
                 .thenReturn(Arrays.asList(items));
 
         mockMvc.perform(get("/items?search={search}&sort={sort}&pageNumber={pageNumber}&pageSize={pageSize}",
@@ -96,7 +107,8 @@ class ItemsControllerTest {
                 .andExpect(content().string(containsString("<span>111</span>")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).getItems(search, sort, pageNumber, pageSize);
+        verify(userService).getCurrentUserId();
+        verify(itemsService).getItems(userId, search, sort, pageNumber, pageSize);
     }
 
     @Test
@@ -107,14 +119,18 @@ class ItemsControllerTest {
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        when(itemsService.getItems(any(), eq(sort), any(), any()))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.getItems(eq(userId), any(), eq(sort), any(), any()))
                 .thenReturn(Arrays.asList(items));
 
         mockMvc.perform(get("/items?sort={sort}", sort))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).getItems(any(), eq(sort), any(), any());
+        verify(userService).getCurrentUserId();
+        verify(itemsService).getItems(eq(userId), any(), eq(sort), any(), any());
     }
 
     @Test
@@ -125,14 +141,18 @@ class ItemsControllerTest {
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        when(itemsService.getItems(any(), eq(sort), any(), any()))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.getItems(eq(userId), any(), eq(sort), any(), any()))
                 .thenReturn(Arrays.asList(items));
 
         mockMvc.perform(get("/items?sort={sort}", sort))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).getItems(any(), eq(sort), any(), any());
+        verify(userService).getCurrentUserId();
+        verify(itemsService).getItems(eq(userId), any(), eq(sort), any(), any());
     }
 
     @Test
@@ -143,14 +163,18 @@ class ItemsControllerTest {
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
-        when(itemsService.getItems(any(), eq(sort), any(), any()))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.getItems(eq(userId), any(), eq(sort), any(), any()))
                 .thenReturn(Arrays.asList(items));
 
         mockMvc.perform(get("/items?sort={sort}", sort))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).getItems(any(), eq(sort), any(), any());
+        verify(userService).getCurrentUserId();
+        verify(itemsService).getItems(eq(userId), any(), eq(sort), any(), any());
     }
 
     @Test
@@ -167,8 +191,8 @@ class ItemsControllerTest {
             fail();
         }
 
-
-        verify(itemsService, never()).getItems(any(), eq(sort), any(), any());
+        verify(userService, never()).getCurrentUserId();
+        verify(itemsService, never()).getItems(any(), any(), eq(sort), any(), any());
     }
 
 
@@ -181,7 +205,10 @@ class ItemsControllerTest {
         Integer pageNumber = 2;
         Integer pageSize = 3;
 
-        when(itemsService.updateCountInCart(id, action))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.updateCountInCart(id, action, userId))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777));
 
         mockMvc.perform(post("/items?id={id}&action={action}&search={search}&sort={sort}&pageNumber={pageNumber}&pageSize={pageSize}",
@@ -189,7 +216,8 @@ class ItemsControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues(HttpHeaders.LOCATION, "/items?search=descr&sort=NO&pageNumber=2&pageSize=3"));
 
-        verify(itemsService).updateCountInCart(id, action);
+        verify(userService).getCurrentUserId();
+        verify(itemsService).updateCountInCart(id, action, userId);
     }
 
     @Test
@@ -197,14 +225,18 @@ class ItemsControllerTest {
         long id = 1L;
         String action = "PLUS";
 
-        when(itemsService.updateCountInCart(id, action))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.updateCountInCart(id, action, userId))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777));
 
         mockMvc.perform(post("/items?id={id}&action={action}", id, action))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues(HttpHeaders.LOCATION, "/items"));
 
-        verify(itemsService).updateCountInCart(id, action);
+        verify(userService).getCurrentUserId();
+        verify(itemsService).updateCountInCart(id, action, userId);
     }
 
     @Test
@@ -212,14 +244,18 @@ class ItemsControllerTest {
         long id = 1L;
         String action = "MINUS";
 
-        when(itemsService.updateCountInCart(id, action))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.updateCountInCart(id, action, userId))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776));
 
         mockMvc.perform(post("/items?id={id}&action={action}", id, action))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues(HttpHeaders.LOCATION, "/items"));
 
-        verify(itemsService).updateCountInCart(id, action);
+        verify(userService).getCurrentUserId();
+        verify(itemsService).updateCountInCart(id, action, userId);
     }
 
     @Test
@@ -236,14 +272,18 @@ class ItemsControllerTest {
             fail();
         }
 
-        verify(itemsService, never()).updateCountInCart(id, action);
+        verify(userService, never()).getCurrentUserId();
+        verify(itemsService, never()).updateCountInCart(eq(id), eq(action), any());
     }
 
     @Test
     void getItem() throws Exception {
         long id = 1L;
 
-        when(itemsService.find(id))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.find(id, userId))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 0));
 
         mockMvc.perform(get("/items/{id}", id))
@@ -251,7 +291,8 @@ class ItemsControllerTest {
                 .andExpect(content().string(containsString("/items/1")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).find(id);
+        verify(userService).getCurrentUserId();
+        verify(itemsService).find(id, userId);
     }
 
     @Test
@@ -259,7 +300,10 @@ class ItemsControllerTest {
         long id = 1L;
         String action = "PLUS";
 
-        when(itemsService.updateCountInCart(id, action))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.updateCountInCart(id, action, userId))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777));
 
         mockMvc.perform(post("/items/{id}?action={action}", id, action))
@@ -268,7 +312,8 @@ class ItemsControllerTest {
                 .andExpect(content().string(containsString("<span>777</span>")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).updateCountInCart(id, action);
+        verify(userService).getCurrentUserId();
+        verify(itemsService).updateCountInCart(id, action, userId);
     }
 
     @Test
@@ -276,7 +321,10 @@ class ItemsControllerTest {
         long id = 1L;
         String action = "MINUS";
 
-        when(itemsService.updateCountInCart(id, action))
+        Long userId = 1L;
+        when(userService.getCurrentUserId()).thenReturn(userId);
+
+        when(itemsService.updateCountInCart(id, action, userId))
                 .thenReturn(new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776));
 
         mockMvc.perform(post("/items/{id}?action={action}", id, action))
@@ -285,7 +333,8 @@ class ItemsControllerTest {
                 .andExpect(content().string(containsString("<span>776</span>")))
                 .andExpect(content().contentType("text/html;charset=UTF-8"));
 
-        verify(itemsService).updateCountInCart(id, action);
+        verify(userService).getCurrentUserId();
+        verify(itemsService).updateCountInCart(id, action, userId);
     }
 
     @Test
@@ -304,6 +353,7 @@ class ItemsControllerTest {
             fail();
         }
 
-        verify(itemsService, never()).updateCountInCart(id, action);
+        verify(userService, never()).getCurrentUserId();
+        verify(itemsService, never()).updateCountInCart(eq(id), eq(action), any());
     }
 }

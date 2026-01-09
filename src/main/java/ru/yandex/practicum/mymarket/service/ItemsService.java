@@ -18,7 +18,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
-import static ru.yandex.practicum.mymarket.service.CartService.USER_ID;
 import static ru.yandex.practicum.mymarket.utils.ListUtils.partition;
 
 @Service
@@ -35,7 +34,7 @@ public class ItemsService {
     }
 
     @Transactional
-    public List<List<ItemDto>> getItems(String search, String sort, Integer pageNumber, Integer pageSize) {
+    public List<List<ItemDto>> getItems(Long userId, String search, String sort, Integer pageNumber, Integer pageSize) {
         PageRequest pageable;
         if ("ALPHA".equals(sort))
             pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.Direction.ASC, "title");
@@ -48,7 +47,7 @@ public class ItemsService {
         Page<Item> page = search != null && !search.isEmpty() ?
                 itemRepository.findAllByTitleContainingOrDescriptionContaining(pageable, search, search) : itemRepository.findAll(pageable);
 
-        Optional<Cart> cartOptional = cartRepository.findByUserId(USER_ID);
+        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
         List<ItemDto> items;
         if (cartOptional.isPresent()) {
             Cart cart = cartOptional.get();
@@ -67,8 +66,8 @@ public class ItemsService {
         return partition(items, 3);
     }
 
-    public ItemDto updateCountInCart(Long id, String action) {
-        List<ItemDto> itemDtoList = cartService.updateCart(id, action);
+    public ItemDto updateCountInCart(Long id, String action, Long userId) {
+        List<ItemDto> itemDtoList = cartService.updateCart(id, action, userId);
 
         return itemDtoList.stream()
                 .filter(itemDto -> Objects.equals(id, itemDto.getId()))
@@ -76,11 +75,11 @@ public class ItemsService {
     }
 
     @Transactional
-    public ItemDto find(Long id) {
+    public ItemDto find(Long id, Long userId) {
         Optional<Item> itemOptional = itemRepository.findById(id);
         if (itemOptional.isEmpty()) throw new NoSuchElementException();
 
-        Optional<Cart> cartOptional = cartRepository.findByUserId(USER_ID);
+        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
         if (cartOptional.isPresent()) {
             Optional<CartItem> cartItemOptional = cartService.findCartItemByItem(cartOptional.get(), id);
             if (cartItemOptional.isPresent())
