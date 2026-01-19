@@ -1,5 +1,5 @@
 # Бэкенд веб-приложения «Витрина интернет-магазина»
-### Yandex Practicum. Java-Middle. Sprint 5
+### Yandex Practicum. Java-Middle. Sprint 6
 
 ## Запуск приложения
 0. Установить docker

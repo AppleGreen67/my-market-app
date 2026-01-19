@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-  name: y5-market
+  name: y6-market
 
   jpa:
     defer-datasource-initialization: true
