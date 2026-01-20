@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import ru.yandex.practicum.mymarket.domain.Cart;
 import ru.yandex.practicum.mymarket.domain.CartItem;
 import ru.yandex.practicum.mymarket.domain.Order;
@@ -11,11 +13,8 @@ import ru.yandex.practicum.mymarket.repository.CartRepository;
 import ru.yandex.practicum.mymarket.repository.OrderRepository;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -38,12 +37,11 @@ class BuyServiceTest {
     void buy_noCart_exception() {
         Long userId = 1L;
 
-        try {
-            service.buy(userId);
-            fail();
-        } catch (Exception e) {
-            assertInstanceOf(NoSuchElementException.class, e);
-        }
+        when(cartRepository.findByUserId(userId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(service.buy(userId))
+                .expectError(NoSuchElementException.class)
+                .verify();
 
         verify(cartRepository).findByUserId(userId);
         verify(orderRepository, never()).save(any());
@@ -62,7 +60,7 @@ class BuyServiceTest {
         Cart cart = new Cart();
         cart.getItems().add(cartItem);
 
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(userId)).thenReturn(Mono.just(cart));
 
         doAnswer(in -> {
             Order orderInSave = in.getArgument(0);
@@ -71,7 +69,7 @@ class BuyServiceTest {
             assertEquals(1, orderInSave.getOrderItems().size());
             assertEquals(cartItem.getCount(), orderInSave.getOrderItems().getFirst().getCount());
 
-            return orderInSave;
+            return Mono.just(orderInSave);
         }).when(orderRepository).save(any(Order.class));
 
         doAnswer(in -> {
@@ -79,11 +77,15 @@ class BuyServiceTest {
 
             assertEquals(0, cartInSave.getItems().size());
 
-            return cartInSave;
+            return Mono.just(cartInSave);
         }).when(cartRepository).save(any(Cart.class));
 
-        Long orderId = service.buy(userId);
-        assertEquals(1, orderId);
+        StepVerifier.create(service.buy(userId))
+                .expectNextMatches(orderId -> {
+                    assertEquals(1, orderId);
+                    return true;
+                })
+                .verifyComplete();
 
         verify(cartRepository).findByUserId(userId);
     }

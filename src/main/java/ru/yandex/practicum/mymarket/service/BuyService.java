@@ -1,8 +1,8 @@
 package ru.yandex.practicum.mymarket.service;
 
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.mymarket.domain.Cart;
+import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.domain.Order;
 import ru.yandex.practicum.mymarket.domain.OrderItem;
 import ru.yandex.practicum.mymarket.repository.CartRepository;
@@ -10,7 +10,6 @@ import ru.yandex.practicum.mymarket.repository.OrderRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class BuyService {
@@ -24,29 +23,28 @@ public class BuyService {
     }
 
     @Transactional
-    public Long buy(Long userId) {
-        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
-        if (cartOptional.isEmpty()) throw new NoSuchElementException();
+    public Mono<Long> buy(Long userId) {
+        return cartRepository.findByUserId(userId)
+                .switchIfEmpty(Mono.error(new NoSuchElementException("Корзина не найдена для пользователя: " + userId)))
+                .flatMap(cart ->{
+                    Order order = new Order();
 
-        Cart cart = cartOptional.get();
+                    List<OrderItem> orderItems = cart.getItems().stream()
+                            .map(cartItem -> {
+                                OrderItem orderItem = new OrderItem();
+                                orderItem.setItem(cartItem.getItem());
+                                orderItem.setCount(cartItem.getCount());
+                                orderItem.setOrder(order);
+                                return orderItem;
+                            }).toList();
 
-        Order order = new Order();
+                    order.setOrderItems(orderItems);
 
-        List<OrderItem> orderItems = cart.getItems().stream()
-                .map(cartItem -> {
-                    OrderItem orderItem = new OrderItem();
-                    orderItem.setItem(cartItem.getItem());
-                    orderItem.setCount(cartItem.getCount());
-                    orderItem.setOrder(order);
-                    return orderItem;
-                }).toList();
-
-        order.setOrderItems(orderItems);
-        orderRepository.save(order);
-
-        cart.getItems().clear();
-        cartRepository.save(cart);
-
-        return order.getId();
+                    return orderRepository.save(order)
+                            .flatMap(savedOrder -> {
+                                cart.getItems().clear();
+                                return cartRepository.save(cart).thenReturn(savedOrder.getId());
+                            });
+                });
     }
 }
