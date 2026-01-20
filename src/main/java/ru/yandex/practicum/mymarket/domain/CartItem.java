@@ -1,30 +1,25 @@
 package ru.yandex.practicum.mymarket.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
-@Entity
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
 @Table(name = "cart_items")
 public class CartItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
+//    @ManyToOne
+//    @JoinColumn(name = "item_id", referencedColumnName = "id")
     private Item item;
 
-    @ManyToOne
-    @JoinColumn(name = "cart_id", nullable = false)
+//    @ManyToOne
+//    @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
 
-    @Column(name = "item_count")
+    @Column("item_count")
     private Integer count;
 
     public Long getId() {

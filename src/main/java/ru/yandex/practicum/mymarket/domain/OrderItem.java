@@ -1,28 +1,23 @@
 package ru.yandex.practicum.mymarket.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
-@Entity
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+
 @Table(name = "order_items")
 public class OrderItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
+//    @ManyToOne
+//    @JoinColumn(name = "item_id", referencedColumnName = "id")
     private Item item;//Здесь @JoinColumn указывает, что поле user_id в таблице OrderItem — это внешний ключ, который ссылается на id таблицы Items.
 
     private Integer count;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+//    @ManyToOne
+//    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     public Long getId() {

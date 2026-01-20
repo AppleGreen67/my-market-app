@@ -1,12 +1,10 @@
 package ru.yandex.practicum.mymarket.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Flux;
 import ru.yandex.practicum.mymarket.domain.Order;
 
-import java.util.List;
+public interface OrderRepository extends ReactiveCrudRepository<Order, Long> {
 
-public interface OrderRepository extends CrudRepository<Order, Long> {
-
-    @Override
-    List<Order> findAll();
+    Flux<Order> findAll();
 }

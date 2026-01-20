@@ -5,17 +5,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import ru.yandex.practicum.mymarket.domain.Order;
 import ru.yandex.practicum.mymarket.domain.OrderItem;
-import ru.yandex.practicum.mymarket.dto.OrderDto;
 import ru.yandex.practicum.mymarket.repository.OrderRepository;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
@@ -53,15 +52,19 @@ class OrderServiceTest {
 
         when(sumService.calculateSum(any())).thenReturn(22L);
 
-        when(orderRepository.findAll()).thenReturn(Collections.singletonList(order));
+        when(orderRepository.findAll()).thenReturn(Flux.just(order));
 
-        List<OrderDto> orders = service.getOrders();
-        assertEquals(1, orders.size());
-        assertEquals(2, orders.getFirst().getId());
-        assertEquals(22, orders.getFirst().getTotalSum());
-        assertEquals(1, orders.getFirst().getItems().size());
-        assertEquals(3, orders.getFirst().getItems().getFirst().getId());
-        assertEquals(2, orders.getFirst().getItems().getFirst().getCount());
+        StepVerifier.create(service.getOrders())
+                .expectNextMatches(orderDto -> {
+                    assertEquals(2, orderDto.getId());
+                    assertEquals(22, orderDto.getTotalSum());
+                    assertEquals(1, orderDto.getItems().size());
+                    assertEquals(3, orderDto.getItems().getFirst().getId());
+                    assertEquals(2, orderDto.getItems().getFirst().getCount());
+                    return true;
+                })
+                .expectNextCount(0)
+                .verifyComplete();
 
         verify(orderRepository).findAll();
     }
@@ -70,14 +73,11 @@ class OrderServiceTest {
     void find_noOrder_exception() {
         Long id = 2L;
 
-        when(orderRepository.findById(id)).thenReturn(Optional.empty());
+        when(orderRepository.findById(id)).thenReturn(Mono.empty());
 
-        try {
-            service.find(id);
-            fail();
-        } catch (Exception e) {
-            assertInstanceOf(NoSuchElementException.class, e);
-        }
+        StepVerifier.create(service.find(id))
+                .expectError(NoSuchElementException.class)
+                .verify();
 
         verify(orderRepository).findById(id);
     }
@@ -99,14 +99,18 @@ class OrderServiceTest {
 
         when(sumService.calculateSum(any())).thenReturn(22L);
 
-        when(orderRepository.findById(id)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(id)).thenReturn(Mono.just(order));
 
-        OrderDto orderDto = service.find(id);
-        assertEquals(id, orderDto.getId());
-        assertEquals(22, orderDto.getTotalSum());
-        assertEquals(1, orderDto.getItems().size());
-        assertEquals(3, orderDto.getItems().getFirst().getId());
-        assertEquals(2, orderDto.getItems().getFirst().getCount());
+        StepVerifier.create(service.find(id))
+                .expectNextMatches(orderDto -> {
+                    assertEquals(2, orderDto.getId());
+                    assertEquals(22, orderDto.getTotalSum());
+                    assertEquals(1, orderDto.getItems().size());
+                    assertEquals(3, orderDto.getItems().getFirst().getId());
+                    assertEquals(2, orderDto.getItems().getFirst().getCount());
+                    return true;
+                })
+                .verifyComplete();
 
         verify(orderRepository).findById(id);
     }
