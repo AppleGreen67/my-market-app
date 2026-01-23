@@ -1,7 +1,6 @@
 package ru.yandex.practicum.mymarket.controller;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,25 +26,25 @@ public class ItemsController {
 
     @GetMapping
     public Mono<Rendering> getItems(@RequestParam(name = "search", required = false) String search,
-                                    @RequestParam(name = "sort", required = false) String sort,
+                                    @RequestParam(name = "sort", required = false) String sortParam,
                                     @RequestParam(name = "pageNumber", required = false) String number,
-                                    @RequestParam(name = "pageSize", required = false) String size,
-                                    Model model) {
-        if (sort == null || sort.isEmpty()) sort = "NO";
+                                    @RequestParam(name = "pageSize", required = false) String size) {
+
+        String sort = sortParam == null || sortParam.isEmpty() ? "NO" : sortParam;
+
         if (!("PRICE".equals(sort) || "ALPHA".equals(sort) || "NO".equals(sort))) {
             throw new UnsupportedOperationException();
         }
 
-        Long userId = userService.getCurrentUserId();
-
         Integer pageNumber = number == null ? 1 : Integer.parseInt(number);
         Integer pageSize = size == null ? 5 : Integer.parseInt(size);
 
-        return Mono.just(
-                Rendering.view("items")
-                        .modelAttribute("items", itemsService.getItems(userId, search, sort, pageNumber, pageSize))
-                        .modelAttribute("paging", new Paging(pageNumber, pageSize))
-                        .build());
+        return userService.getCurrentUserId()
+                .flatMap(userId -> Mono.just(
+                        Rendering.view("items")
+                                .modelAttribute("items", itemsService.getItems(userId, search, sortParam, pageNumber, pageSize))
+                                .modelAttribute("paging", new Paging(pageNumber, pageSize))
+                                .build()));
     }
 
     @PostMapping
@@ -60,35 +59,32 @@ public class ItemsController {
             throw new UnsupportedOperationException();
         }
 
-        Long userId = userService.getCurrentUserId();
-        return itemsService.updateCountInCart(id, action, userId)
-                .map(itemDto -> "redirect:/items?search=" + search + "&sort=" + sort + "&pageNumber=" + pageNumber + "&pageSize=" + pageSize);
+        return userService.getCurrentUserId()
+                .flatMap(userId -> itemsService.updateCountInCart(id, action, userId)
+                        .map(itemDto -> "redirect:/items?search=" + search + "&sort=" + sort + "&pageNumber=" + pageNumber + "&pageSize=" + pageSize));
     }
 
     @GetMapping("/{id}")
-    public Mono<Rendering> getItem(@PathVariable(name = "id") Long id, Model model) {
-        Long userId = userService.getCurrentUserId();
-
-        return itemsService.find(id, userId)
-                .map(itemDto -> Rendering.view("item")
-                        .modelAttribute("item", itemDto)
-                        .build())
-                .switchIfEmpty(Mono.just(Rendering.redirectTo("error").build()));
+    public Mono<Rendering> getItem(@PathVariable(name = "id") Long id) {
+        return userService.getCurrentUserId()
+                .flatMap(userId -> itemsService.find(id, userId)
+                        .map(itemDto -> Rendering.view("item")
+                                .modelAttribute("item", itemDto)
+                                .build())
+                        .switchIfEmpty(Mono.just(Rendering.redirectTo("error").build())));
     }
 
     @PostMapping("/{id}")
     public Mono<Rendering> changeItemCount(@PathVariable(name = "id") Long id,
-                                  @RequestParam(name = "action") String action,
-                                  Model model) {
+                                           @RequestParam(name = "action") String action) {
         if (!("MINUS".equals(action) || "PLUS".equals(action))) {
             throw new UnsupportedOperationException();
         }
 
-        Long userId = userService.getCurrentUserId();
-
-        return itemsService.updateCountInCart(id, action, userId)
-                .map(itemDto -> Rendering.view("item")
-                        .modelAttribute("item", itemDto)
-                        .build());
+        return userService.getCurrentUserId()
+                .flatMap(userId -> itemsService.updateCountInCart(id, action, userId)
+                        .map(itemDto -> Rendering.view("item")
+                                .modelAttribute("item", itemDto)
+                                .build()));
     }
 }

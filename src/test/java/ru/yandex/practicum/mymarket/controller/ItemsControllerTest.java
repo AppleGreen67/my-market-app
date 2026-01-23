@@ -47,7 +47,7 @@ class ItemsControllerTest {
                 new ItemDto(6L, "title6", "description6", "imageUrl", 66L, 666));
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(eq(userId), any(), any(), any(), any()))
                 .thenReturn(items);
@@ -81,7 +81,7 @@ class ItemsControllerTest {
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(userId, search, sort, pageNumber, pageSize))
                 .thenReturn(items);
@@ -113,7 +113,7 @@ class ItemsControllerTest {
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(eq(userId), any(), eq(sort), any(), any()))
                 .thenReturn(items);
@@ -144,7 +144,7 @@ class ItemsControllerTest {
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(eq(userId), any(), eq(sort), any(), any()))
                 .thenReturn(items);
@@ -175,7 +175,7 @@ class ItemsControllerTest {
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(eq(userId), any(), eq(sort), any(), any()))
                 .thenReturn(items);
@@ -230,7 +230,7 @@ class ItemsControllerTest {
         Integer pageSize = 3;
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777);
         when(itemsService.updateCountInCart(id, action, userId))
@@ -253,7 +253,7 @@ class ItemsControllerTest {
         String action = "PLUS";
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777);
         when(itemsService.updateCountInCart(id, action, userId))
@@ -276,7 +276,7 @@ class ItemsControllerTest {
         String action = "MINUS";
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776);
         when(itemsService.updateCountInCart(id, action, userId))
@@ -321,7 +321,7 @@ class ItemsControllerTest {
         long id = 1L;
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 0);
         when(itemsService.find(id, userId))
@@ -347,7 +347,7 @@ class ItemsControllerTest {
         String action = "PLUS";
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777);
         when(itemsService.updateCountInCart(id, action, userId))
@@ -374,7 +374,7 @@ class ItemsControllerTest {
         String action = "MINUS";
 
         Long userId = 1L;
-        when(userService.getCurrentUserId()).thenReturn(userId);
+        when(userService.getCurrentUserId()). thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776);
         when(itemsService.updateCountInCart(id, action, userId))
