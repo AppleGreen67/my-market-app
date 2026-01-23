@@ -1,10 +1,12 @@
 package ru.yandex.practicum.mymarket.service;
 
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.domain.Cart;
 import ru.yandex.practicum.mymarket.domain.CartItem;
 import ru.yandex.practicum.mymarket.domain.Item;
@@ -34,7 +36,7 @@ public class ItemsService {
     }
 
     @Transactional
-    public List<List<ItemDto>> getItems(Long userId, String search, String sort, Integer pageNumber, Integer pageSize) {
+    public Flux<ItemDto> getItems(Long userId, String search, String sort, Integer pageNumber, Integer pageSize) {
         PageRequest pageable;
         if ("ALPHA".equals(sort))
             pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.Direction.ASC, "title");
@@ -44,48 +46,51 @@ public class ItemsService {
             pageable = PageRequest.of(pageNumber - 1, pageSize);
 
 
-        Page<Item> page = search != null && !search.isEmpty() ?
-                itemRepository.findAllByTitleContainingOrDescriptionContaining(pageable, search, search) : itemRepository.findAll(pageable);
-
-        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
-        List<ItemDto> items;
-        if (cartOptional.isPresent()) {
-            Cart cart = cartOptional.get();
-            items = page.get()
-                    .map(item -> {
-                        Optional<CartItem> cartItemOptional = cartService.findCartItemByItem(cart, item.getId());
-                        return cartItemOptional.map(ItemDtoMapper::mapp).orElseGet(() -> ItemDtoMapper.mapp(item));
-                    }).toList();
-
-        } else {
-            items = page.get()
-                    .map(ItemDtoMapper::mapp)
-                    .toList();
-        }
-
-        return partition(items, 3);
+//        Page<Item> page = search != null && !search.isEmpty() ?
+//                itemRepository.findAllByTitleContainingOrDescriptionContaining(pageable, search, search) : itemRepository.findAll(pageable);
+//
+//        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
+//        List<ItemDto> items;
+//        if (cartOptional.isPresent()) {
+//            Cart cart = cartOptional.get();
+//            items = page.get()
+//                    .map(item -> {
+//                        Optional<CartItem> cartItemOptional = cartService.findCartItemByItem(cart, item.getId());
+//                        return cartItemOptional.map(ItemDtoMapper::mapp).orElseGet(() -> ItemDtoMapper.mapp(item));
+//                    }).toList();
+//
+//        } else {
+//            items = page.get()
+//                    .map(ItemDtoMapper::mapp)
+//                    .toList();
+//        }
+//
+//        return partition(items, 3);
+        return null;
     }
 
-    public ItemDto updateCountInCart(Long id, String action, Long userId) {
-        List<ItemDto> itemDtoList = cartService.updateCart(id, action, userId);
-
-        return itemDtoList.stream()
-                .filter(itemDto -> Objects.equals(id, itemDto.getId()))
-                .findFirst().orElseThrow();
+    public Mono<ItemDto> updateCountInCart(Long id, String action, Long userId) {
+//        List<ItemDto> itemDtoList = cartService.updateCart(id, action, userId);
+//
+//        return itemDtoList.stream()
+//                .filter(itemDto -> Objects.equals(id, itemDto.getId()))
+//                .findFirst().orElseThrow();
+        return null;
     }
 
     @Transactional
-    public ItemDto find(Long id, Long userId) {
-        Optional<Item> itemOptional = itemRepository.findById(id);
-        if (itemOptional.isEmpty()) throw new NoSuchElementException();
-
-        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
-        if (cartOptional.isPresent()) {
-            Optional<CartItem> cartItemOptional = cartService.findCartItemByItem(cartOptional.get(), id);
-            if (cartItemOptional.isPresent())
-                return ItemDtoMapper.mapp(cartItemOptional.get());
-        }
-
-        return ItemDtoMapper.mapp(itemOptional.get());
+    public Mono<ItemDto>  find(Long id, Long userId) {
+//        Optional<Item> itemOptional = itemRepository.findById(id);
+//        if (itemOptional.isEmpty()) throw new NoSuchElementException();
+//
+//        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
+//        if (cartOptional.isPresent()) {
+//            Optional<CartItem> cartItemOptional = cartService.findCartItemByItem(cartOptional.get(), id);
+//            if (cartItemOptional.isPresent())
+//                return ItemDtoMapper.mapp(cartItemOptional.get());
+//        }
+//
+//        return ItemDtoMapper.mapp(itemOptional.get());
+        return null;
     }
 }

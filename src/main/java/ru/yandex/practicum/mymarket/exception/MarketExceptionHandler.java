@@ -3,14 +3,15 @@ package ru.yandex.practicum.mymarket.exception;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import reactor.core.publisher.Mono;
 
 @ControllerAdvice
 public class MarketExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public String handleException(Exception ex, Model model) {
+    public Mono<String> handleException(Exception ex, Model model) {
         System.out.println("Произошла ошибка: " + ex);
         model.addAttribute("message", "Сервис временно недоступен");
-        return "error";
+        return Mono.just("error");
     }
 }
