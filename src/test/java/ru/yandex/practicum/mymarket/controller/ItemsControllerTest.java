@@ -12,10 +12,6 @@ import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.service.ItemsService;
 import ru.yandex.practicum.mymarket.service.user.IUserService;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static java.nio.file.Paths.get;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -42,7 +38,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void getItems() throws Exception {
+    void getItems() {
         Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333),
@@ -74,7 +70,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void getItems_withParams() throws Exception {
+    void getItems_withParams() {
         String search = "descr";
         String sort = "NO";
         Integer pageNumber = 2;
@@ -109,7 +105,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void getItems_sortIsNo() throws Exception {
+    void getItems_sortIsNo() {
         String sort = "NO";
 
         Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
@@ -140,7 +136,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void getItems_sortIsALPHA() throws Exception {
+    void getItems_sortIsALPHA() {
         String sort = "ALPHA";
 
         Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
@@ -171,7 +167,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void getItems_sortIsPRICE() throws Exception {
+    void getItems_sortIsPRICE() {
         String sort = "PRICE";
 
          Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
@@ -202,7 +198,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void getItems_sortIsUnknown() throws Exception {
+    void getItems_sortIsUnknown() {
         String sort = "UNKNOWN";
 
         try {
@@ -225,7 +221,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void changeCount_allParams_plus() throws Exception {
+    void changeCount_allParams_plus() {
         long id = 1L;
         String action = "PLUS";
         String search = "descr";
@@ -252,7 +248,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void changeCount_plus() throws Exception {
+    void changeCount_plus() {
         long id = 1L;
         String action = "PLUS";
 
@@ -275,7 +271,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void changeCount_minus() throws Exception {
+    void changeCount_minus() {
         long id = 1L;
         String action = "MINUS";
 
@@ -297,7 +293,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void changeCount_exception() throws Exception {
+    void changeCount_exception() {
         long id = 1L;
         String action = "unknow";
 
@@ -321,7 +317,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void getItem() throws Exception {
+    void getItem() {
         long id = 1L;
 
         Long userId = 1L;
@@ -346,7 +342,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void changeItemCount_plus() throws Exception {
+    void changeItemCount_plus() {
         long id = 1L;
         String action = "PLUS";
 
@@ -373,7 +369,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void changeItemCount_minus() throws Exception {
+    void changeItemCount_minus() {
         long id = 1L;
         String action = "MINUS";
 
@@ -400,7 +396,7 @@ class ItemsControllerTest {
     }
 
     @Test
-    void changeItemCount_exception() throws Exception {
+    void changeItemCount_exception() {
         long id = 1L;
         String action = "unknow";
 
