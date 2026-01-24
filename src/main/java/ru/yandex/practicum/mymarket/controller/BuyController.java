@@ -3,7 +3,7 @@ package ru.yandex.practicum.mymarket.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.service.BuyService;
 import ru.yandex.practicum.mymarket.service.user.IUserService;
 
@@ -20,12 +20,9 @@ public class BuyController {
     }
 
     @PostMapping
-    public String buy(RedirectAttributes redirectAttributes) {
-        Long userId = userService.getCurrentUserId();
-
-        Long id = buyService.buy(userId);
-
-        redirectAttributes.addAttribute("newOrder", true);
-        return "redirect:/orders/"+id;
+    public Mono<String> buy() {
+        return userService.getCurrentUserId()
+                .flatMap(userId -> buyService.buy(userId)
+                        .map(orderId->"redirect:/orders/"+orderId+"?newOrder=true"));
     }
 }
