@@ -26,7 +26,8 @@ public class OrderService {
         return orderRepository.findAll()
                 .map(order -> {
                     List<OrderItemDto> list = order.getOrderItems().stream().map(OrderItemDtoMapper::mapp).toList();
-                    return new OrderDto(order.getId(), list, sumService.calculateSum(list));
+                    return new OrderDto(order.getId(), list, 0L);
+//                    return new OrderDto(order.getId(), list, sumService.calculateSum(list));
                 });
     }
 
@@ -35,7 +36,8 @@ public class OrderService {
                 .switchIfEmpty(Mono.error(new NoSuchElementException("Заказ не найден: " + id)))
                 .map(order -> {
                     List<OrderItemDto> list = order.getOrderItems().stream().map(OrderItemDtoMapper::mapp).toList();
-                    return new OrderDto(order.getId(), list, sumService.calculateSum(list));
+                    return new OrderDto(order.getId(), list, 0L);
+//                    return new OrderDto(order.getId(), list, sumService.calculateSum(list));
                 });
     }
 
