@@ -14,6 +14,7 @@ import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.mapper.ItemDtoMapper;
 import ru.yandex.practicum.mymarket.repository.CartItemRepository;
 import ru.yandex.practicum.mymarket.repository.CartRepository;
+import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 import ru.yandex.practicum.mymarket.repository.ItemRepository;
 
 import java.util.List;
@@ -27,11 +28,11 @@ import static ru.yandex.practicum.mymarket.utils.ListUtils.partition;
 public class ItemsService {
 
     private final CartService cartService;
-    private final ItemRepository itemRepository;
+    private final ItemDatabaseClientRepository itemRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
 
-    public ItemsService(CartService cartService, ItemRepository itemRepository, CartRepository cartRepository, CartItemRepository cartItemRepository) {
+    public ItemsService(CartService cartService, ItemDatabaseClientRepository itemRepository, CartRepository cartRepository, CartItemRepository cartItemRepository) {
         this.cartService = cartService;
         this.itemRepository = itemRepository;
         this.cartRepository = cartRepository;
@@ -83,15 +84,6 @@ public class ItemsService {
 
     @Transactional
     public Mono<ItemDto>  find(Long id, Long userId) {
-        return itemRepository.findById(id)
-                .flatMap(item -> {
-                    return cartRepository.findByUserId(userId)
-                            .flatMap(cart ->{
-                                return cartItemRepository.findByCartIdAndItemId(cart.getId(), id)
-                                        .map(cartItem -> ItemDtoMapper.mapp(cartItem))
-                                        .switchIfEmpty(Mono.just(ItemDtoMapper.mapp(item)));
-                            })
-                            .switchIfEmpty(Mono.just(ItemDtoMapper.mapp(item)));
-                });
+        return itemRepository.findById(id);
     }
 }
