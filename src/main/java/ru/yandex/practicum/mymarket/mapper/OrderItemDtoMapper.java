@@ -7,7 +7,8 @@ import ru.yandex.practicum.mymarket.dto.OrderItemDto;
 public class OrderItemDtoMapper {
 
     public static OrderItemDto mapp(OrderItem orderItem) {
-        Item item = orderItem.getItem();
+        Item item = null;
+//        Item item = orderItem.getItem();
         return new OrderItemDto(item.getId(), item.getTitle(), item.getPrice(), orderItem.getCount());
     }
 }

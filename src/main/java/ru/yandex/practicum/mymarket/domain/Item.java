@@ -7,11 +7,9 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table(name = "items")
 public class Item {
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
     private String description;
-//    @Column(name = "img_path")
     private String imgPath;
     private Long price;
 

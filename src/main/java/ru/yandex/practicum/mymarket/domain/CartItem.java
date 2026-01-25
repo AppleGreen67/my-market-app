@@ -8,17 +8,9 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table(name = "cart_items")
 public class CartItem {
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-//    @ManyToOne
-//    @JoinColumn(name = "item_id", referencedColumnName = "id")
-    private Item item;
-
-//    @ManyToOne
-//    @JoinColumn(name = "cart_id", nullable = false)
-    private Cart cart;
-
+    private Long itemId;
+    private Long cartId;
     @Column("item_count")
     private Integer count;
 
@@ -30,20 +22,20 @@ public class CartItem {
         this.id = id;
     }
 
-    public Item getItem() {
-        return item;
+    public Long getItemId() {
+        return itemId;
     }
 
-    public void setItem(Item item) {
-        this.item = item;
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
     }
 
-    public Cart getCart() {
-        return cart;
+    public Long getCartId() {
+        return cartId;
     }
 
-    public void setCart(Cart cart) {
-        this.cart = cart;
+    public void setCartId(Long cartId) {
+        this.cartId = cartId;
     }
 
     public Integer getCount() {

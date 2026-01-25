@@ -4,13 +4,11 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.mymarket.domain.Item;
-
-import java.util.Collection;
+import ru.yandex.practicum.mymarket.domain.CartItem;
 
 @Repository
-public interface ItemRepository extends ReactiveCrudRepository<Item, Long> {
+public interface CartItemRepository extends ReactiveCrudRepository<CartItem, Long> {
 
-    Flux<Item> findAllById(Collection<Long> ids);
-    Mono<Item> findById(Long id);
+    Flux<CartItem> findByCartId(Long cartId);
+    Mono<CartItem> findByCartIdAndItemId(Long cartId, Long itemId);
 }

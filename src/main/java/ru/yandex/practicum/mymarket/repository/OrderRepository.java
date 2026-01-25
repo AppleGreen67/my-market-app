@@ -5,6 +5,5 @@ import reactor.core.publisher.Flux;
 import ru.yandex.practicum.mymarket.domain.Order;
 
 public interface OrderRepository extends ReactiveCrudRepository<Order, Long> {
-
     Flux<Order> findAll();
 }

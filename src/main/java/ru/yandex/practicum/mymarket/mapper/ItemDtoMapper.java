@@ -11,7 +11,9 @@ public class ItemDtoMapper {
     }
 
     public static ItemDto mapp(CartItem cartItem) {
-        return mapp(cartItem.getItem(), cartItem.getCount());
+        return new ItemDto(cartItem.getItemId(), null, null, null, null, cartItem.getCount());
+//        return mapp(null, cartItem.getCount());
+//        return mapp(cartItem.getItem(), cartItem.getCount());
     }
 
     private static ItemDto mapp(Item item, Integer count) {

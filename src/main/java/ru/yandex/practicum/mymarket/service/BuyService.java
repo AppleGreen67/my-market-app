@@ -29,21 +29,22 @@ public class BuyService {
                 .flatMap(cart ->{
                     Order order = new Order();
 
-                    List<OrderItem> orderItems = cart.getItems().stream()
-                            .map(cartItem -> {
-                                OrderItem orderItem = new OrderItem();
-                                orderItem.setItem(cartItem.getItem());
-                                orderItem.setCount(cartItem.getCount());
-                                orderItem.setOrder(order);
-                                return orderItem;
-                            }).toList();
+//                    List<OrderItem> orderItems = cart.getItems().stream()
+//                            .map(cartItem -> {
+//                                OrderItem orderItem = new OrderItem();
+////                                orderItem.setItem(cartItem.getItem());
+//                                orderItem.setCount(cartItem.getCount());
+////                                orderItem.setOrder(order);
+//                                return orderItem;
+//                            }).toList();
 
-                    order.setOrderItems(orderItems);
+//                    order.setOrderItems(orderItems);
 
                     return orderRepository.save(order)
                             .flatMap(savedOrder -> {
-                                cart.getItems().clear();
-                                return cartRepository.save(cart).thenReturn(savedOrder.getId());
+//                                cart.getItems().clear();
+                                return cartRepository.save(cart)
+                                        .thenReturn(savedOrder.getId());
                             });
                 });
     }

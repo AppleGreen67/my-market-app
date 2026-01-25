@@ -1,58 +1,63 @@
-//package ru.yandex.practicum.mymarket.service;
-//
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.data.domain.PageImpl;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Sort;
-//import org.springframework.test.context.bean.override.mockito.MockitoBean;
-//import ru.yandex.practicum.mymarket.domain.Cart;
-//import ru.yandex.practicum.mymarket.domain.CartItem;
-//import ru.yandex.practicum.mymarket.domain.Item;
-//import ru.yandex.practicum.mymarket.dto.ItemDto;
-//import ru.yandex.practicum.mymarket.repository.CartRepository;
-//import ru.yandex.practicum.mymarket.repository.ItemRepository;
-//
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.NoSuchElementException;
-//import java.util.Optional;
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
-//import static org.junit.jupiter.api.Assertions.fail;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.ArgumentMatchers.eq;
-//import static org.mockito.Mockito.clearInvocations;
-//import static org.mockito.Mockito.doAnswer;
-//import static org.mockito.Mockito.never;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static ru.yandex.practicum.mymarket.utils.ItemsUtils.getItem;
-//
-//@SpringBootTest(classes = ItemsService.class)
-//class ItemsServiceTest {
-//
-//    @MockitoBean
-//    private CartService cartService;
-//    @MockitoBean
-//    private ItemRepository itemRepository;
-//    @MockitoBean
-//    private CartRepository cartRepository;
-//
-//    @Autowired
-//    private ItemsService service;
-//
-//    @BeforeEach
-//    void setUp() {
-//        clearInvocations(cartService);
-//        clearInvocations(itemRepository);
-//        clearInvocations(cartRepository);
-//    }
-//
+package ru.yandex.practicum.mymarket.service;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+import ru.yandex.practicum.mymarket.domain.Cart;
+import ru.yandex.practicum.mymarket.domain.CartItem;
+import ru.yandex.practicum.mymarket.domain.Item;
+import ru.yandex.practicum.mymarket.dto.ItemDto;
+import ru.yandex.practicum.mymarket.repository.CartItemRepository;
+import ru.yandex.practicum.mymarket.repository.CartRepository;
+import ru.yandex.practicum.mymarket.repository.ItemRepository;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static ru.yandex.practicum.mymarket.utils.ItemsUtils.getItem;
+
+@SpringBootTest(classes = ItemsService.class)
+class ItemsServiceTest {
+
+    @MockitoBean
+    private CartService cartService;
+    @MockitoBean
+    private ItemRepository itemRepository;
+    @MockitoBean
+    private CartRepository cartRepository;
+    @MockitoBean
+    private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private ItemsService service;
+
+    @BeforeEach
+    void setUp() {
+        clearInvocations(cartService);
+        clearInvocations(itemRepository);
+        clearInvocations(cartRepository);
+    }
+
 //    @Test
 //    void getItems_noCart_searchAndPageAndAlpha() {
 //        Long userId = 1L;
@@ -265,7 +270,7 @@
 //
 //        verify(cartService).updateCart(id, action, userId);
 //    }
-//
+
 //    @Test
 //    void find_exception() {
 //        Long userId = 1L;
@@ -303,37 +308,48 @@
 //        verify(itemRepository).findById(id);
 //        verify(cartRepository).findByUserId(userId);
 //    }
-//
-//    @Test
-//    void find_noItemInCart() {
-//        Long userId = 1L;
-//
-//        Long id = 2L;
-//
-//        Item item = getItem(2L, "title2", "description2", "imagePath", 22L);
-//
-//        when(itemRepository.findById(id)).thenReturn(Optional.of(item));
-//
-//        CartItem cartItem = new CartItem();
-//        cartItem.setId(1L);
-//        cartItem.setCount(23);
-//
-//        Cart cart = new Cart();
-//        cart.getItems().add(cartItem);
-//
-//        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
-//        when(cartService.findCartItemByItem(cart, id)).thenReturn(Optional.empty());
-//
+
+    @Test
+    void find_noItemInCart() {
+        Long userId = 1L;
+
+        Long id = 2L;
+
+        Item item = getItem(id, "title2", "description2", "imagePath", 22L);
+        when(itemRepository.findById(id)).thenReturn(Mono.just(item));
+
+        CartItem cartItem = new CartItem();
+        cartItem.setId(1L);
+        cartItem.setCartId(1L);
+        cartItem.setItemId(id);
+//        cartItem.setItemTitle("title2");
+        cartItem.setCount(23);
+
+        Cart cart = new Cart();
+        cart.setId(1L);
+
+        when(cartRepository.findByUserId(userId)).thenReturn(Mono.just(cart));
+        when(cartItemRepository.findByCartIdAndItemId(cart.getId(), id)).thenReturn(Mono.just(cartItem));
+
+        StepVerifier.create(service.find(id, userId))
+                .expectNextMatches(foundedItem ->{
+                    assertEquals(id, foundedItem.getId());
+                    assertEquals("title2", foundedItem.getTitle());
+                    assertEquals(23, foundedItem.getCount());
+                    return true;
+                })
+                .expectNextCount(0);
+
 //        ItemDto itemDto = service.find(id, userId);
 //        assertNotNull(itemDto);
 //        assertEquals(id, itemDto.getId());
 //        assertEquals("title2", itemDto.getTitle());
 //        assertEquals(0, itemDto.getCount());
-//
+
 //        verify(itemRepository).findById(id);
 //        verify(cartRepository).findByUserId(userId);
-//    }
-//
+    }
+
 //    @Test
 //    void find_countFromItemInCart() {
 //        Long userId = 1L;
@@ -364,5 +380,5 @@
 //        verify(itemRepository).findById(id);
 //        verify(cartRepository).findByUserId(userId);
 //    }
-//
-//}
+
+}

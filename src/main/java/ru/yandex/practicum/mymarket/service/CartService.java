@@ -1,7 +1,8 @@
 package ru.yandex.practicum.mymarket.service;
 
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import ru.yandex.practicum.mymarket.domain.Cart;
 import ru.yandex.practicum.mymarket.domain.CartItem;
 import ru.yandex.practicum.mymarket.domain.Item;
@@ -26,57 +27,58 @@ public class CartService {
         this.itemRepository = itemRepository;
     }
 
-    public List<ItemDto> getCartItems(Long userId) {
-        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
-
-        return cartOptional.map(cart -> cart.getItems().stream()
-                .map(ItemDtoMapper::mapp).toList()).orElseGet(ArrayList::new);
-
+    public Flux<ItemDto> getCartItems(Long userId) {
+        return null;
+//        return cartRepository.findByUserId(userId)
+//                .flatMapMany(cart -> Flux.fromStream(cart.getItems().stream()
+//                        .map(ItemDtoMapper::mapp)));
     }
 
     @Transactional
-    public List<ItemDto> updateCart(Long id, String action, Long userId) {
-        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
-        Cart cart;
-        if (cartOptional.isEmpty()) {
-            cart = new Cart();
-            cart.setUserId(userId);
-            cartRepository.save(cart);
-        } else {
-            cart = cartOptional.get();
-        }
-
-        Optional<CartItem> cartItemOptional = findCartItemByItem(cart, id);
-        if (cartItemOptional.isEmpty()) {
-            Optional<Item> itemOptional = itemRepository.findById(id);
-            if (itemOptional.isEmpty()) throw new NoSuchElementException();
-
-            CartItem cartItem = new CartItem();
-            cartItem.setCart(cart);
-            cartItem.setCount(1);
-            cartItem.setItem(itemOptional.get());
-
-            cart.getItems().add(cartItem);
-        } else {
-            CartItem cartItem = cartItemOptional.get();
-
-            Integer newCount = getCount(cartItem.getCount(), action);
-            if (newCount == 0)
-                cart.getItems().remove(cartItem);
-            else
-                cartItem.setCount(newCount);
-        }
-
-        cartRepository.save(cart);
-
-        return cart.getItems().stream()
-                .map(ItemDtoMapper::mapp).toList();
+    public Flux<ItemDto> updateCart(Long id, String action, Long userId) {
+//        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
+//        Cart cart;
+//        if (cartOptional.isEmpty()) {
+//            cart = new Cart();
+//            cart.setUserId(userId);
+//            cartRepository.save(cart);
+//        } else {
+//            cart = cartOptional.get();
+//        }
+//
+//        Optional<CartItem> cartItemOptional = findCartItemByItem(cart, id);
+//        if (cartItemOptional.isEmpty()) {
+//            Optional<Item> itemOptional = itemRepository.findById(id);
+//            if (itemOptional.isEmpty()) throw new NoSuchElementException();
+//
+//            CartItem cartItem = new CartItem();
+//            cartItem.setCart(cart);
+//            cartItem.setCount(1);
+//            cartItem.setItem(itemOptional.get());
+//
+//            cart.getItems().add(cartItem);
+//        } else {
+//            CartItem cartItem = cartItemOptional.get();
+//
+//            Integer newCount = getCount(cartItem.getCount(), action);
+//            if (newCount == 0)
+//                cart.getItems().remove(cartItem);
+//            else
+//                cartItem.setCount(newCount);
+//        }
+//
+//        cartRepository.save(cart);
+//
+//        return cart.getItems().stream()
+//                .map(ItemDtoMapper::mapp).toList();
+        return null;
     }
 
     public Optional<CartItem> findCartItemByItem(Cart cart, Long itemId) {
-        return cart.getItems().stream()
-                .filter(cartItem -> cartItem.getItem().getId().equals(itemId))
-                .findFirst();
+        return null;
+        //        return cart.getItems().stream()
+//                .filter(cartItem -> cartItem.getItem().getId().equals(itemId))
+//                .findFirst();
     }
 
     private Integer getCount(Integer count, String action) {

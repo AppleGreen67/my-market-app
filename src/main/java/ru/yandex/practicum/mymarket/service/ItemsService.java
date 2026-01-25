@@ -12,6 +12,7 @@ import ru.yandex.practicum.mymarket.domain.CartItem;
 import ru.yandex.practicum.mymarket.domain.Item;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.mapper.ItemDtoMapper;
+import ru.yandex.practicum.mymarket.repository.CartItemRepository;
 import ru.yandex.practicum.mymarket.repository.CartRepository;
 import ru.yandex.practicum.mymarket.repository.ItemRepository;
 
@@ -28,11 +29,13 @@ public class ItemsService {
     private final CartService cartService;
     private final ItemRepository itemRepository;
     private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
 
-    public ItemsService(CartService cartService, ItemRepository itemRepository, CartRepository cartRepository) {
+    public ItemsService(CartService cartService, ItemRepository itemRepository, CartRepository cartRepository, CartItemRepository cartItemRepository) {
         this.cartService = cartService;
         this.itemRepository = itemRepository;
         this.cartRepository = cartRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
     @Transactional
@@ -80,17 +83,15 @@ public class ItemsService {
 
     @Transactional
     public Mono<ItemDto>  find(Long id, Long userId) {
-//        Optional<Item> itemOptional = itemRepository.findById(id);
-//        if (itemOptional.isEmpty()) throw new NoSuchElementException();
-//
-//        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
-//        if (cartOptional.isPresent()) {
-//            Optional<CartItem> cartItemOptional = cartService.findCartItemByItem(cartOptional.get(), id);
-//            if (cartItemOptional.isPresent())
-//                return ItemDtoMapper.mapp(cartItemOptional.get());
-//        }
-//
-//        return ItemDtoMapper.mapp(itemOptional.get());
-        return null;
+        return itemRepository.findById(id)
+                .flatMap(item -> {
+                    return cartRepository.findByUserId(userId)
+                            .flatMap(cart ->{
+                                return cartItemRepository.findByCartIdAndItemId(cart.getId(), id)
+                                        .map(cartItem -> ItemDtoMapper.mapp(cartItem))
+                                        .switchIfEmpty(Mono.just(ItemDtoMapper.mapp(item)));
+                            })
+                            .switchIfEmpty(Mono.just(ItemDtoMapper.mapp(item)));
+                });
     }
 }
