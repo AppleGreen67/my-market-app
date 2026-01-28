@@ -9,6 +9,6 @@ import ru.yandex.practicum.mymarket.domain.CartItem;
 @Repository
 public interface CartItemRepository extends ReactiveCrudRepository<CartItem, Long> {
 
-    Flux<CartItem> findByCartId(Long cartId);
-    Mono<CartItem> findByCartIdAndItemId(Long cartId, Long itemId);
+//    Flux<CartItem> findByCartId(Long cartId);
+//    Mono<CartItem> findByCartIdAndItemId(Long cartId, Long itemId);
 }

@@ -9,8 +9,10 @@ import org.springframework.data.relational.core.mapping.Table;
 public class CartItem {
     @Id
     private Long id;
+    @Column("item_id")
     private Long itemId;
-    private Long cartId;
+    @Column("user_id")
+    private Long userId;
     @Column("item_count")
     private Integer count;
 
@@ -30,12 +32,12 @@ public class CartItem {
         this.itemId = itemId;
     }
 
-    public Long getCartId() {
-        return cartId;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setCartId(Long cartId) {
-        this.cartId = cartId;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Integer getCount() {

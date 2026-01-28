@@ -320,7 +320,7 @@ class ItemsServiceTest {
 
         CartItem cartItem = new CartItem();
         cartItem.setId(1L);
-        cartItem.setCartId(1L);
+//        cartItem.setCartId(1L);
         cartItem.setItemId(id);
 //        cartItem.setItemTitle("title2");
         cartItem.setCount(23);
@@ -329,7 +329,7 @@ class ItemsServiceTest {
         cart.setId(1L);
 
         when(cartRepository.findByUserId(userId)).thenReturn(Mono.just(cart));
-        when(cartItemRepository.findByCartIdAndItemId(cart.getId(), id)).thenReturn(Mono.just(cartItem));
+//        when(cartItemRepository.findByCartIdAndItemId(cart.getId(), id)).thenReturn(Mono.just(cartItem));
 
         StepVerifier.create(service.find(id, userId))
                 .expectNextMatches(foundedItem ->{
