@@ -55,15 +55,35 @@ public class CartDatabaseClientRepository {
                 .one().switchIfEmpty(Mono.empty());
     }
 
-    public void updateItem(Long userId, Long id) {
-
+    public Mono<Long> saveItem(CartItem cartItem) {
+        return databaseClient.sql("""
+                        insert into cart_items (user_id, item_id, item_count) values (:user_id, :item_id, :count)
+                        """)
+                .bind("user_id", cartItem.getUserId())
+                .bind("item_id", cartItem.getItemId())
+                .bind("count", cartItem.getCount())
+                .fetch()
+                .rowsUpdated();
     }
 
-    public void deleteItem(Long userId, Long id) {
-
+    public Mono<Long> updateItem(Long userId, Long itemId, Integer count) {
+        return databaseClient.sql("""
+                        update cart_items set item_count = :count where user_id = :user_id and item_id = :item_id
+                        """)
+                .bind("count", count)
+                .bind("user_id", userId)
+                .bind("item_id", itemId)
+                .fetch()
+                .rowsUpdated();
     }
 
-    public Mono<Boolean> saveItem(CartItem cartItem) {
-        return null;
+    public Mono<Long> deleteItem(Long userId, Long itemId) {
+        return databaseClient.sql("""
+                        delete from cart_items where item_id = 4 and user_id = 17
+                        """)
+                .bind("user_id", userId)
+                .bind("item_id", itemId)
+                .fetch()
+                .rowsUpdated();
     }
 }

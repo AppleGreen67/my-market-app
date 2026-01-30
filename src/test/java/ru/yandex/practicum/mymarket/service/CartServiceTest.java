@@ -1,248 +1,187 @@
-//package ru.yandex.practicum.mymarket.service;
-//
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.test.context.bean.override.mockito.MockitoBean;
-//import reactor.core.publisher.Mono;
-//import reactor.test.StepVerifier;
-//import ru.yandex.practicum.mymarket.domain.Cart;
-//import ru.yandex.practicum.mymarket.domain.CartItem;
-//import ru.yandex.practicum.mymarket.domain.Item;
-//import ru.yandex.practicum.mymarket.dto.ItemDto;
-//import ru.yandex.practicum.mymarket.repository.CartRepository;
-//import ru.yandex.practicum.mymarket.repository.ItemRepository;
-//
-//import java.util.List;
-//import java.util.Optional;
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertFalse;
-//import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.clearInvocations;
-//import static org.mockito.Mockito.never;
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static ru.yandex.practicum.mymarket.utils.ItemsUtils.getItem;
-//
-//@SpringBootTest(classes = CartService.class)
-//class CartServiceTest {
-//
-//    @MockitoBean
-//    private CartRepository cartRepository;
-//    @MockitoBean
-//    private ItemRepository itemRepository;
-//
-//    @Autowired
-//    private CartService service;
-//
-//    @BeforeEach
-//    void setUp() {
-//        clearInvocations(cartRepository);
-//        clearInvocations(itemRepository);
-//    }
-//
-//    @Test
-//    void getCartItems_noCart() {
-//        Long userId = 1L;
-//
-//        when(cartRepository.findByUserId(userId)).thenReturn(Mono.empty());
-//
-//        StepVerifier.create(service.getCartItems(userId))
-//                .expectNextCount(0)
-//                .verifyComplete();
-//    }
-//
-//    @Test
-//    void getCartItems() {
-//        Long userId = 1L;
-//
-//        CartItem cartItem = new CartItem();
-//        cartItem.setId(1L);
-////        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-//        cartItem.setCount(3);
-//
-//        Cart cart = new Cart();
-////        cart.getItems().add(cartItem);
-//
-//        when(cartRepository.findByUserId(userId)).thenReturn(Mono.just(cart));
-//
-//        StepVerifier.create(service.getCartItems(userId))
-//                .expectNextMatches(itemDto -> {
-//                    assertEquals(2L, itemDto.getId());
-//                    assertEquals("title2", itemDto.getTitle());
-//                    assertEquals("description2", itemDto.getDescription());
-//                    assertEquals("imagePath", itemDto.getImgPath());
-//                    assertEquals(3, itemDto.getCount());
-//                    return true;
-//                })
-//                .expectNextCount(0)
-//                .verifyComplete();
-//    }
-//
-////    @Test
-////    void updateCart_noCart() {
-////        Long userId = 1L;
-////
-////        Long id = 1L;
-////        String action = "PLUS";
-////
-////        when(cartRepository.findByUserId(userId)).thenReturn(Optional.empty());
-////
-////        Item item = getItem(1L, "title1", "description1", "imagePath", 4);
-////        when(itemRepository.findById(id)).thenReturn(Optional.of(item));
-////
-////
-////        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-////        assertEquals(1, itemDtoList.size());
-////        assertEquals(1, itemDtoList.getFirst().getId());
-////        assertEquals(1, itemDtoList.getFirst().getCount());
-////
-////        verify(cartRepository).findByUserId(userId);
-////        verify(itemRepository).findById(id);
-////        verify(cartRepository, times(2)).save(any(Cart.class));
-////    }
-////
-////    @Test
-////    void updateCart_noCartItem() {
-////        Long userId = 1L;
-////
-////        Long id = 1L;
-////        String action = "PLUS";
-////
-////        CartItem cartItem = new CartItem();
-////        cartItem.setId(1L);
-////        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-////        cartItem.setCount(3);
-////
-////        Cart cart = new Cart();
-////        cart.getItems().add(cartItem);
-////
-////        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
-////
-////        Item item = getItem(1L, "title1", "description1", "imagePath", 4);
-////        when(itemRepository.findById(id)).thenReturn(Optional.of(item));
-////
-////
-////        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-////        assertEquals(2, itemDtoList.size());
-////        assertEquals(2, itemDtoList.get(0).getId());
-////        assertEquals(3, itemDtoList.get(0).getCount());
-////
-////        assertEquals(1, itemDtoList.get(1).getId());
-////        assertEquals(1, itemDtoList.get(1).getCount());
-////
-////        verify(cartRepository).findByUserId(userId);
-////        verify(itemRepository).findById(id);
-////        verify(cartRepository, times(1)).save(any(Cart.class));
-////    }
-////
-////    @Test
-////    void updateCart_plus() {
-////        Long userId = 1L;
-////
-////        Long id = 2L;
-////        String action = "PLUS";
-////
-////        CartItem cartItem = new CartItem();
-////        cartItem.setId(1L);
-////        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-////        cartItem.setCount(3);
-////
-////        Cart cart = new Cart();
-////        cart.getItems().add(cartItem);
-////
-////        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
-////
-////        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-////        assertEquals(1, itemDtoList.size());
-////        assertEquals(2, itemDtoList.getFirst().getId());
-////        assertEquals(4, itemDtoList.getFirst().getCount());
-////
-////        verify(cartRepository).findByUserId(userId);
-////        verify(itemRepository, never()).findById(id);
-////        verify(cartRepository, times(1)).save(any(Cart.class));
-////    }
-////
-////    @Test
-////    void updateCart_minus() {
-////        Long userId = 1L;
-////
-////        Long id = 2L;
-////        String action = "MINUS";
-////
-////        CartItem cartItem = new CartItem();
-////        cartItem.setId(1L);
-////        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-////        cartItem.setCount(3);
-////
-////        Cart cart = new Cart();
-////        cart.getItems().add(cartItem);
-////
-////        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
-////
-////        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-////        assertEquals(1, itemDtoList.size());
-////        assertEquals(2, itemDtoList.getFirst().getId());
-////        assertEquals(2, itemDtoList.getFirst().getCount());
-////
-////        verify(cartRepository).findByUserId(userId);
-////        verify(itemRepository, never()).findById(id);
-////        verify(cartRepository, times(1)).save(any(Cart.class));
-////    }
-////
-////    @Test
-////    void updateCart_delete() {
-////        Long userId = 1L;
-////
-////        Long id = 2L;
-////        String action = "DELETE";
-////
-////        CartItem cartItem = new CartItem();
-////        cartItem.setId(1L);
-////        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-////        cartItem.setCount(3);
-////
-////        Cart cart = new Cart();
-////        cart.getItems().add(cartItem);
-////
-////        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
-////
-////        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-////        assertEquals(0, itemDtoList.size());
-////
-////        verify(cartRepository).findByUserId(userId);
-////        verify(itemRepository, never()).findById(id);
-////        verify(cartRepository, times(1)).save(any(Cart.class));
-////    }
-////
-////    @Test
-////    void findCartItemByItem() {
-////        CartItem cartItem = new CartItem();
-////        cartItem.setId(1L);
-////        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 2L));
-////        cartItem.setCount(3);
-////
-////        CartItem cartItem2 = new CartItem();
-////        cartItem2.setId(2L);
-////        cartItem2.setItem(getItem(3L, "title3", "description3", "imagePath", 11L));
-////        cartItem2.setCount(3);
-////
-////        Cart cart = new Cart();
-////        cart.getItems().add(cartItem);
-////        cart.getItems().add(cartItem2);
-////
-////
-////        Optional<CartItem> cartItemByItem = service.findCartItemByItem(cart, 2L);
-////        assertTrue(cartItemByItem.isPresent());
-////        assertEquals(2L, cartItemByItem.get().getItem().getId());
-////
-////
-////        cartItemByItem = service.findCartItemByItem(cart, 4L);
-////        assertFalse(cartItemByItem.isPresent());
-////    }
-//
-//}
+package ru.yandex.practicum.mymarket.service;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+import ru.yandex.practicum.mymarket.domain.CartItem;
+import ru.yandex.practicum.mymarket.dto.ItemDto;
+import ru.yandex.practicum.mymarket.repository.CartDatabaseClientRepository;
+import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@SpringBootTest(classes = CartService.class)
+class CartServiceTest {
+
+    @MockitoBean
+    private CartDatabaseClientRepository cartRepository;
+    @MockitoBean
+    private ItemDatabaseClientRepository itemRepository;
+
+    @Autowired
+    private CartService service;
+
+    @BeforeEach
+    void setUp() {
+        clearInvocations(cartRepository);
+        clearInvocations(itemRepository);
+    }
+
+    @Test
+    void getCartItems() {
+        Long userId = 1L;
+
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(2L);
+        itemDto1.setCount(12);
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(1L);
+        itemDto.setTitle("Бейсболка черная");
+        itemDto.setCount(1);
+
+        when(cartRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto, itemDto1));
+
+        StepVerifier.create(service.getCartItems(userId))
+                .expectNextCount(2)
+                .verifyComplete();
+
+        verify(cartRepository).findByUserId(userId);
+    }
+
+    @Test
+    void updateCart_update() {
+        Long userId = 1L;
+
+        Long itemId = 1L;
+        String action = "PLUS";
+
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(2L);
+        itemDto1.setCount(12);
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(itemId);
+        itemDto.setTitle("Бейсболка черная");
+        itemDto.setCount(1);
+
+        when(cartRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.just(itemDto));
+
+        doAnswer(invocationOnMock -> {
+            itemDto.setCount(invocationOnMock.getArgument(2));
+            return Mono.just(1L);
+        }).when(cartRepository).updateItem(eq(userId), eq(itemId), anyInt());
+
+        when(cartRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto, itemDto1));
+
+        StepVerifier.create(service.updateCart(itemId, action, userId))
+                .expectNextMatches(dto -> {
+                    assertEquals(itemId, dto.getId());
+                    assertEquals(2, itemDto.getCount());
+                    return true;
+                })
+                .expectNextCount(1)
+                .verifyComplete();
+
+        verify(cartRepository).findByUserIdAndItemId(userId, itemId);
+        verify(cartRepository).findByUserId(userId);
+        verify(cartRepository).updateItem(eq(userId), eq(itemId), anyInt());
+        verify(cartRepository, never()).deleteItem(eq(userId), eq(itemId));
+        verify(itemRepository, never()).findById(itemId);
+        verify(cartRepository, never()).saveItem(any(CartItem.class));
+    }
+
+    @Test
+    void updateCart_delete() {
+        Long userId = 1L;
+
+        Long itemId = 1L;
+        String action = "MINUS";
+
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(2L);
+        itemDto1.setCount(12);
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(itemId);
+        itemDto.setTitle("Бейсболка черная");
+        itemDto.setCount(1);
+
+        when(cartRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.just(itemDto));
+
+        when(cartRepository.deleteItem(eq(userId), eq(itemId))).thenReturn(Mono.just(1L));
+
+        when(cartRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto1));
+
+        StepVerifier.create(service.updateCart(itemId, action, userId))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        verify(cartRepository).findByUserIdAndItemId(userId, itemId);
+        verify(cartRepository).findByUserId(userId);
+        verify(cartRepository, never()).updateItem(eq(userId), eq(itemId), anyInt());
+        verify(cartRepository).deleteItem(eq(userId), eq(itemId));
+        verify(itemRepository, never()).findById(itemId);
+        verify(cartRepository, never()).saveItem(any(CartItem.class));
+    }
+
+    @Test
+    void updateCart_noCartItem() {
+        Long userId = 1L;
+
+        Long itemId = 1L;
+        String action = "PLUS";
+
+        when(cartRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.empty());
+
+        ItemDto foundedItem = new ItemDto();
+        foundedItem.setId(itemId);
+        foundedItem.setTitle("Бейсболка черная");
+        foundedItem.setDescription("Очень модная бейсболка черного цвета");
+        foundedItem.setImgPath("2.jpg");
+        foundedItem.setPrice(1500L);
+        when(itemRepository.findById(itemId)).thenReturn(Mono.just(foundedItem));
+
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(2L);
+        itemDto1.setCount(12);
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(1L);
+
+        when(cartRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto, itemDto1));
+
+        doAnswer(invocationOnMock -> {
+            CartItem cartItem = invocationOnMock.getArgument(0);
+            assertEquals(userId, cartItem.getUserId());
+            assertEquals(itemId, cartItem.getItemId());
+            assertEquals(1, cartItem.getCount());
+            return Mono.just(1L);
+        }).when(cartRepository).saveItem(any());
+
+        StepVerifier.create(service.updateCart(itemId, action, userId))
+                .expectNextCount(2)
+                .verifyComplete();
+
+        verify(cartRepository).findByUserIdAndItemId(userId, itemId);
+        verify(cartRepository).findByUserId(userId);
+        verify(cartRepository, never()).updateItem(eq(userId), eq(itemId), anyInt());
+        verify(cartRepository, never()).deleteItem(eq(userId), eq(itemId));
+        verify(itemRepository).findById(itemId);
+        verify(cartRepository).saveItem(any(CartItem.class));
+    }
+
+}
