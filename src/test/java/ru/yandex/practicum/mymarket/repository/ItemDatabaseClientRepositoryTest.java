@@ -23,7 +23,6 @@ class ItemDatabaseClientRepositoryTest {
     @BeforeEach
     void setUp() {
         databaseClient.sql("delete from items").fetch().rowsUpdated().block();
-        databaseClient.sql("delete from carts").fetch().rowsUpdated().block();
         databaseClient.sql("delete from cart_items").fetch().rowsUpdated().block();
 
         databaseClient.sql("""
@@ -93,12 +92,19 @@ class ItemDatabaseClientRepositoryTest {
                 })
                 .verifyComplete();
 
-        databaseClient.sql("""
-                        insert into cart_items (cart_id, item_id, item_count) values (1, 1, 23);
-                        """)
-                .fetch()
-                .rowsUpdated()
-                .block();
+        Long userId = 17L;
+
+        databaseClient.sql("insert into cart_items (user_id, item_id, item_count) values (:user_id, :item_id, :item_count)")
+                .bind("user_id", userId)
+                .bind("item_id", 1L)
+                .bind("item_count", 23)
+                .fetch().rowsUpdated().block();
+
+        databaseClient.sql("insert into cart_items (user_id, item_id, item_count) values (:user_id, :item_id, :item_count)")
+                .bind("user_id", userId)
+                .bind("item_id", 4L)
+                .bind("item_count", 3)
+                .fetch().rowsUpdated().block();
 
         StepVerifier.create(repository.findById(1L))
                 .expectNextMatches(itemDto -> {

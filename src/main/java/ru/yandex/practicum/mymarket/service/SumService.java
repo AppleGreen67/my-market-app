@@ -5,10 +5,18 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.dto.IItem;
 
+import java.util.List;
+
 @Service
 public class SumService {
     public Mono<Long> calculateSum(Flux<? extends IItem> items) {
         return items.map(item -> item.getPrice() * item.getCount())
                 .reduce(0L, Long::sum);
+    }
+
+    public Long calculateSum(List<? extends IItem> items) {
+        if (items == null || items.isEmpty()) return 0L;
+
+        return items.stream().mapToLong(item -> item.getPrice() * item.getCount()).sum();
     }
 }

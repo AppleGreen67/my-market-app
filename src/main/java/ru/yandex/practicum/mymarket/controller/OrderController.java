@@ -8,29 +8,35 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.service.OrderService;
+import ru.yandex.practicum.mymarket.service.user.IUserService;
 
 @Controller
 @RequestMapping("/orders")
 public class OrderController {
 
+    private final IUserService userService;
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(IUserService userService, OrderService orderService) {
+        this.userService = userService;
         this.orderService = orderService;
     }
 
     @GetMapping
     public Mono<Rendering> getOrders() {
-        return Mono.just(Rendering.view("orders")
-                .modelAttribute("orders", orderService.getOrders())
-                .build());
+        return userService.getCurrentUserId()
+                .flatMap(userId-> Mono.just(Rendering.view("orders")
+                        .modelAttribute("orders", orderService.getOrders(userId))
+                        .build()));
     }
 
     @GetMapping("/{id}")
     public Mono<Rendering> getOrder(@PathVariable(name = "id") Long id,
                            @RequestParam(name = "newOrder", required = false) String newOrder) {
-        return Mono.just(Rendering.view("order")
-                .modelAttribute("order", orderService.find(id))
-                .build());
+
+        return userService.getCurrentUserId()
+                .flatMap(userId-> Mono.just(Rendering.view("order")
+                .modelAttribute("order", orderService.find(userId, id))
+                .build()));
     }
 }

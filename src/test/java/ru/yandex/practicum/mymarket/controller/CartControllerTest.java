@@ -194,6 +194,6 @@ class CartControllerTest {
 
         verify(userService, never()).getCurrentUserId();
         verify(cartService, never()).updateCart(eq(id), eq(action), any());
-        verify(sumService, never()).calculateSum(any());
+        verify(sumService, never()).calculateSum(any(Flux.class));
     }
 }

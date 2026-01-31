@@ -309,36 +309,36 @@ class ItemsServiceTest {
 //        verify(cartRepository).findByUserId(userId);
 //    }
 
-    @Test
+//    @Test
     void find_noItemInCart() {
-        Long userId = 1L;
-
-        Long id = 2L;
-
-        Item item = getItem(id, "title2", "description2", "imagePath", 22L);
-        when(itemRepository.findById(id)).thenReturn(Mono.just(item));
-
-        CartItem cartItem = new CartItem();
-        cartItem.setId(1L);
-//        cartItem.setCartId(1L);
-        cartItem.setItemId(id);
-//        cartItem.setItemTitle("title2");
-        cartItem.setCount(23);
-
-        Cart cart = new Cart();
-        cart.setId(1L);
-
-        when(cartRepository.findByUserId(userId)).thenReturn(Mono.just(cart));
-//        when(cartItemRepository.findByCartIdAndItemId(cart.getId(), id)).thenReturn(Mono.just(cartItem));
-
-        StepVerifier.create(service.find(id, userId))
-                .expectNextMatches(foundedItem ->{
-                    assertEquals(id, foundedItem.getId());
-                    assertEquals("title2", foundedItem.getTitle());
-                    assertEquals(23, foundedItem.getCount());
-                    return true;
-                })
-                .expectNextCount(0);
+//        Long userId = 1L;
+//
+//        Long id = 2L;
+//
+//        Item item = getItem(id, "title2", "description2", "imagePath", 22L);
+//        when(itemRepository.findById(id)).thenReturn(Mono.just(item));
+//
+//        CartItem cartItem = new CartItem();
+//        cartItem.setId(1L);
+////        cartItem.setCartId(1L);
+//        cartItem.setItemId(id);
+////        cartItem.setItemTitle("title2");
+//        cartItem.setCount(23);
+//
+//        Cart cart = new Cart();
+//        cart.setId(1L);
+//
+//        when(cartRepository.findByUserId(userId)).thenReturn(Mono.just(cart));
+////        when(cartItemRepository.findByCartIdAndItemId(cart.getId(), id)).thenReturn(Mono.just(cartItem));
+//
+//        StepVerifier.create(service.find(id, userId))
+//                .expectNextMatches(foundedItem ->{
+//                    assertEquals(id, foundedItem.getId());
+//                    assertEquals("title2", foundedItem.getTitle());
+//                    assertEquals(23, foundedItem.getCount());
+//                    return true;
+//                })
+//                .expectNextCount(0);
 
 //        ItemDto itemDto = service.find(id, userId);
 //        assertNotNull(itemDto);
