@@ -4,14 +4,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.mymarket.domain.Cart;
 import ru.yandex.practicum.mymarket.domain.CartItem;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.repository.CartDatabaseClientRepository;
 import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class CartService {
@@ -53,13 +51,6 @@ public class CartService {
                 })
                 .switchIfEmpty((Mono.error(new NoSuchElementException("Не найдет товар в корзине с id=" + itemId))))
                 .flatMap(cartDatabaseClientRepository::saveItem);
-    }
-
-    public Optional<CartItem> findCartItemByItem(Cart cart, Long itemId) {
-        return null;
-        //        return cart.getItems().stream()
-//                .filter(cartItem -> cartItem.getItem().getId().equals(itemId))
-//                .findFirst();
     }
 
     private Integer getCount(Integer count, String action) {

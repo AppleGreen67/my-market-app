@@ -4,16 +4,13 @@ import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.mymarket.domain.Order;
-import ru.yandex.practicum.mymarket.domain.OrderItem;
 import ru.yandex.practicum.mymarket.domain.OrderItemFull;
+import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.dto.OrderDto;
 import ru.yandex.practicum.mymarket.dto.OrderItemDto;
 import ru.yandex.practicum.mymarket.service.SumService;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class OrderDatabaseClientRepository {
@@ -82,7 +79,19 @@ public class OrderDatabaseClientRepository {
                 .all()
                 .collectList()
                 .map((this::createOrderDto))
-                    .switchIfEmpty(Mono.empty());
-        }
+                .switchIfEmpty(Mono.empty());
+    }
 
+    public Mono<Long> saveOrderItems(List<ItemDto> cartItemsList, Long orderId) {
+        StringBuilder sb = new StringBuilder()
+                .append("insert into order_items (item_id, item_count, order_id) values ");
+
+        sb.append(String.join(", ",
+                cartItemsList.stream()
+                        .map(itemDto -> "(%d, %d, %d)".formatted(itemDto.getId(), itemDto.getCount(), orderId))
+                        .toList()));
+        return databaseClient.sql(sb.toString())
+                .fetch()
+                .rowsUpdated();
+    }
 }
