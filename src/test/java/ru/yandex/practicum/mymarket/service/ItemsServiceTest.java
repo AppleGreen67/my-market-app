@@ -4,37 +4,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import ru.yandex.practicum.mymarket.domain.Cart;
-import ru.yandex.practicum.mymarket.domain.CartItem;
-import ru.yandex.practicum.mymarket.domain.Item;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
-import ru.yandex.practicum.mymarket.repository.CartItemRepository;
-import ru.yandex.practicum.mymarket.repository.CartRepository;
-import ru.yandex.practicum.mymarket.repository.ItemRepository;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.yandex.practicum.mymarket.utils.ItemsUtils.getItem;
 
 @SpringBootTest(classes = ItemsService.class)
 class ItemsServiceTest {
@@ -42,11 +21,7 @@ class ItemsServiceTest {
     @MockitoBean
     private CartService cartService;
     @MockitoBean
-    private ItemRepository itemRepository;
-    @MockitoBean
-    private CartRepository cartRepository;
-    @MockitoBean
-    private CartItemRepository cartItemRepository;
+    private ItemDatabaseClientRepository itemRepository;
 
     @Autowired
     private ItemsService service;
@@ -55,7 +30,53 @@ class ItemsServiceTest {
     void setUp() {
         clearInvocations(cartService);
         clearInvocations(itemRepository);
-        clearInvocations(cartRepository);
+    }
+
+    @Test
+    public void findById() {
+        Long itemId = 1L;
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(itemId);
+        itemDto.setTitle("Бейсболка черная");
+        itemDto.setDescription("Очень модная бейсболка черного цвета");
+        itemDto.setImgPath("2.jpg");
+        itemDto.setPrice(1500L);
+        itemDto.setCount(3);
+        when(itemRepository.findById(itemId)).thenReturn(Mono.just(itemDto));
+
+        StepVerifier.create(service.find(itemId, 17L))
+                .expectNextMatches(foundedItem ->{
+                    assertEquals(1L, foundedItem.getId());
+                    assertEquals("Бейсболка черная", foundedItem.getTitle());
+                    assertEquals("Очень модная бейсболка черного цвета", foundedItem.getDescription());
+                    assertEquals("2.jpg", foundedItem.getImgPath());
+                    assertEquals(1500, foundedItem.getPrice());
+                    assertEquals(3, foundedItem.getCount());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+
+    @Test
+    public void updateCountInCart() {
+        Long itemId = 1L;
+        String action = "PLUS";
+        Long userId = 17L;
+
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(itemId);
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(2L);
+        when(cartService.updateCart(itemId, action, userId)).thenReturn(Flux.just(itemDto, itemDto1));
+
+        StepVerifier.create(service.updateCountInCart(itemId, action, userId))
+                .expectNextMatches(updatedItem ->{
+                    assertEquals(1L, updatedItem.getId());
+                    return true;
+                })
+                .verifyComplete();
     }
 
 //    @Test
