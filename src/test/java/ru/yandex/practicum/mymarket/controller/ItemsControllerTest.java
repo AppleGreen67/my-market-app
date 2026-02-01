@@ -12,6 +12,10 @@ import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.service.ItemsService;
 import ru.yandex.practicum.mymarket.service.user.IUserService;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,10 +43,11 @@ class ItemsControllerTest {
 
     @Test
     void getItems() {
-        Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
-                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333),
-                new ItemDto(4L, "title4", "description4", "imageUrl", 44L, 444),
+                new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
+
+        List<ItemDto> items1 = Arrays.asList(new ItemDto(4L, "title4", "description4", "imageUrl", 44L, 444),
                 new ItemDto(5L, "title5", "description5", "imageUrl", 55L, 555),
                 new ItemDto(6L, "title6", "description6", "imageUrl", 66L, 666));
 
@@ -50,7 +55,7 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(eq(userId), any(), any(), any(), any()))
-                .thenReturn(items);
+                .thenReturn(Mono.just(Arrays.asList(items, items1)));
 
         webTestClient.get()
                 .uri("/items")
@@ -76,7 +81,7 @@ class ItemsControllerTest {
         Integer pageNumber = 2;
         Integer pageSize = 3;
 
-        Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
@@ -84,7 +89,7 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(userId, search, sort, pageNumber, pageSize))
-                .thenReturn(items);
+                .thenReturn(Mono.just(Collections.singletonList(items)));
 
         webTestClient.get()
                 .uri("/items?search={search}&sort={sort}&pageNumber={pageNumber}&pageSize={pageSize}",
@@ -108,7 +113,7 @@ class ItemsControllerTest {
     void getItems_sortIsNo() {
         String sort = "NO";
 
-        Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
@@ -116,7 +121,7 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(eq(userId), any(), eq(sort), any(), any()))
-                .thenReturn(items);
+                .thenReturn(Mono.just(Collections.singletonList(items)));
 
         webTestClient.get()
                 .uri("/items?sort={sort}", sort)
@@ -139,7 +144,7 @@ class ItemsControllerTest {
     void getItems_sortIsALPHA() {
         String sort = "ALPHA";
 
-        Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
@@ -147,7 +152,7 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(eq(userId), any(), eq(sort), any(), any()))
-                .thenReturn(items);
+                .thenReturn(Mono.just(Collections.singletonList(items)));
 
         webTestClient.get()
                 .uri("/items?sort={sort}", sort)
@@ -170,7 +175,7 @@ class ItemsControllerTest {
     void getItems_sortIsPRICE() {
         String sort = "PRICE";
 
-         Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+        List<ItemDto> items = Arrays.asList(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
@@ -178,7 +183,7 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         when(itemsService.getItems(eq(userId), any(), eq(sort), any(), any()))
-                .thenReturn(items);
+                .thenReturn(Mono.just(Collections.singletonList(items)));
 
         webTestClient.get()
                 .uri("/items?sort={sort}", sort)
