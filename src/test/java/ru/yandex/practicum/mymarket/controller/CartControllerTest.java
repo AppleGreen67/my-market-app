@@ -86,7 +86,7 @@ class CartControllerTest {
 
         when(cartService.updateCart(id, action, userId)).thenReturn(items);
 
-        when(sumService.calculateSum(items)).thenReturn(Mono.just(7777L));
+        when(sumService.calculateSum(any(Flux.class))).thenReturn(Mono.just(7777L));
 
         webTestClient.post()
                 .uri("/cart/items?id={id}&action={action}", id, action)
@@ -103,7 +103,7 @@ class CartControllerTest {
 
         verify(userService).getCurrentUserId();
         verify(cartService).updateCart(id, action, userId);
-        verify(sumService).calculateSum(items);
+        verify(sumService).calculateSum(any(Flux.class));
     }
 
     @Test
@@ -120,7 +120,7 @@ class CartControllerTest {
 
         when(cartService.updateCart(id, action, userId)).thenReturn(items);
 
-        when(sumService.calculateSum(items)).thenReturn(Mono.just(666L));
+        when(sumService.calculateSum(any(Flux.class))).thenReturn(Mono.just(666L));
 
         webTestClient.post()
                 .uri("/cart/items?id={id}&action={action}", id, action)
@@ -137,7 +137,7 @@ class CartControllerTest {
 
         verify(userService).getCurrentUserId();
         verify(cartService).updateCart(id, action, userId);
-        verify(sumService).calculateSum(items);
+        verify(sumService).calculateSum(any(Flux.class));
     }
 
     @Test
@@ -153,7 +153,7 @@ class CartControllerTest {
 
         when(cartService.updateCart(id, action, userId)).thenReturn(items);
 
-        when(sumService.calculateSum(items)).thenReturn(Mono.just(25L));
+        when(sumService.calculateSum(any(Flux.class))).thenReturn(Mono.just(25L));
 
         webTestClient.post()
                 .uri("/cart/items?id={id}&action={action}", id, action)
@@ -169,7 +169,7 @@ class CartControllerTest {
 
         verify(userService).getCurrentUserId();
         verify(cartService).updateCart(id, action, userId);
-        verify(sumService).calculateSum(items);
+        verify(sumService).calculateSum(any(Flux.class));
     }
 
     @Test

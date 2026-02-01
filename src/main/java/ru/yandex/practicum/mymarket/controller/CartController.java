@@ -52,8 +52,8 @@ public class CartController {
                 .flatMap(userId -> {
                             Flux<ItemDto> itemDtoFlux = cartService.updateCart(request.getId(), action, userId).cache();
                             return Mono.just(Rendering.view("cart")
-                                    .modelAttribute("items", itemDtoFlux)
                                     .modelAttribute("total", sumService.calculateSum(itemDtoFlux))
+                                    .modelAttribute("items", itemDtoFlux)
                                     .build());
                         }
                 );

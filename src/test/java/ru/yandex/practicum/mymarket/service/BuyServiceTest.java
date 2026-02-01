@@ -55,6 +55,7 @@ class BuyServiceTest {
         when(orderService.create(userId)).thenReturn(Mono.just(orderId));
 
         when(orderService.saveItems(anyList(), eq(orderId))).thenReturn(Mono.just(2L));
+        when(cartService.deleteAll(userId)).thenReturn(Mono.just(2L));
 
         StepVerifier.create(service.buy(userId))
                 .expectNextMatches(buyId -> {
@@ -64,6 +65,7 @@ class BuyServiceTest {
                 .verifyComplete();
 
         verify(cartService).getCartItems(userId);
+        verify(cartService).deleteAll(userId);
         verify(orderService).create(userId);
         verify(orderService).saveItems(anyList(), eq(orderId));
     }
