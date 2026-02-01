@@ -15,7 +15,7 @@ public class ItemDatabaseClientRepository {
         this.databaseClient = databaseClient;
     }
 
-    public Flux<ItemDto> findAll(String search) {
+    public Flux<ItemDto> findAll(String search, String sort, Integer pageNumber, Integer pageSize) {
         StringBuilder sb = new StringBuilder()
                 .append("""
                         select i.*, coalesce(ci.item_count, 0) as item_count from items i
@@ -23,6 +23,15 @@ public class ItemDatabaseClientRepository {
                         """);
         if (search!= null && !search.isBlank())
             sb.append("where title like '%%%s%%' or description like '%%%s%%'".formatted(search, search));
+        if ("ALPHA".equals(sort))
+            sb.append("order by i.title");
+        else if ("PRICE".equals(sort))
+            sb.append("order by i.price");
+
+        sb.append("""
+                 limit %d
+                offset %d
+                """.formatted(pageSize,  (pageNumber - 1) * pageSize));
 
         return databaseClient.sql(sb.toString())
                 .map((row, metadata) ->
