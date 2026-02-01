@@ -2,11 +2,12 @@ package ru.yandex.practicum.mymarket.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.mymarket.controller.request.OrderRequest;
 import ru.yandex.practicum.mymarket.service.OrderService;
 import ru.yandex.practicum.mymarket.service.user.IUserService;
 
@@ -32,7 +33,7 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public Mono<Rendering> getOrder(@PathVariable(name = "id") Long id,
-                           @RequestParam(name = "newOrder", required = false) String newOrder) {
+                                    @ModelAttribute OrderRequest request) {
 
         return userService.getCurrentUserId()
                 .flatMap(userId-> Mono.just(Rendering.view("order")

@@ -1,7 +1,6 @@
 package ru.yandex.practicum.mymarket.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.domain.CartItem;
@@ -26,7 +25,6 @@ public class CartService {
         return cartDatabaseClientRepository.findByUserId(userId);
     }
 
-    @Transactional
     public Flux<ItemDto> updateCart(Long itemId, String action, Long userId) {
         return cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)
                 .flatMap(itemDto -> {
@@ -36,7 +34,7 @@ public class CartService {
                     else
                         return cartDatabaseClientRepository.updateItem(userId, itemId, newCount);
                 })
-                .switchIfEmpty(Mono.defer(() -> addItem(userId, itemId)))
+                .switchIfEmpty(addItem(userId, itemId))
                 .thenMany(cartDatabaseClientRepository.findByUserId(userId));
     }
 
@@ -51,6 +49,10 @@ public class CartService {
                 })
                 .switchIfEmpty((Mono.error(new NoSuchElementException("Не найдет товар в корзине с id=" + itemId))))
                 .flatMap(cartDatabaseClientRepository::saveItem);
+    }
+
+    public Mono<Long> deleteAll(Long userId) {
+        return cartDatabaseClientRepository.deleteAll(userId);
     }
 
     private Integer getCount(Integer count, String action) {

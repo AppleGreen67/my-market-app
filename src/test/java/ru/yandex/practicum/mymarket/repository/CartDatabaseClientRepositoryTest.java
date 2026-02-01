@@ -85,6 +85,10 @@ class CartDatabaseClientRepositoryTest {
 
         Long userId = 17L;
 
+        StepVerifier.create(repository.findByUserId(userId))
+                .expectNextCount(0)
+                .verifyComplete();
+
         databaseClient.sql("insert into cart_items (user_id, item_id, item_count) values (:user_id, :item_id, :item_count)")
                 .bind("user_id", userId)
                 .bind("item_id", 1L)

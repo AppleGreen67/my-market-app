@@ -15,9 +15,32 @@ public class ItemDatabaseClientRepository {
         this.databaseClient = databaseClient;
     }
 
+    public Flux<ItemDto> findAll(String search) {
+        StringBuilder sb = new StringBuilder()
+                .append("""
+                        select i.*, coalesce(ci.item_count, 0) as item_count from items i
+                        left join cart_items ci on ci.item_id = i.id
+                        """);
+        if (search!= null && !search.isBlank())
+            sb.append("where title like '%%%s%%' or description like '%%%s%%'".formatted(search, search));
+
+        return databaseClient.sql(sb.toString())
+                .map((row, metadata) ->
+                        new ItemDto(
+                                row.get("id", Long.class),
+                                row.get("title", String.class),
+                                row.get("description", String.class),
+                                row.get("img_path", String.class),
+                                row.get("price", Long.class),
+                                row.get("item_count", Integer.class)
+                        ))
+                .all();
+    }
+
     public Flux<ItemDto> findAll() {
         return databaseClient.sql("""
-                            select i.* from items i
+                        select i.*, coalesce(ci.item_count, 0) as item_count from items i
+                        left join cart_items ci on ci.item_id = i.id
                         """)
                 .map((row, metadata) ->
                         new ItemDto(
@@ -26,7 +49,7 @@ public class ItemDatabaseClientRepository {
                                 row.get("description", String.class),
                                 row.get("img_path", String.class),
                                 row.get("price", Long.class),
-                                0
+                                row.get("item_count", Integer.class)
                         ))
                 .all();
     }

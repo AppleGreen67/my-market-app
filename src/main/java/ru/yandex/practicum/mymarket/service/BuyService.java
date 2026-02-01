@@ -24,9 +24,8 @@ public class BuyService {
                 .collectList()
                 .flatMap(cartItemsList ->
                         orderService.create(userId)
-                                .map(orderId -> {
-                                    orderService.saveItems(cartItemsList, orderId);
-                                    return orderId;
-                                }));
+                                .flatMap(orderId -> orderService.saveItems(cartItemsList, orderId)
+                                        .flatMap(l->cartService.deleteAll(userId))
+                                        .then(Mono.just(orderId))));
     }
 }

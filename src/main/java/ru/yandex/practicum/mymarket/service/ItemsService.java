@@ -51,7 +51,7 @@ public class ItemsService {
 //        }
 //
 //        return partition(items, 3);
-        return null;
+        return itemRepository.findAll(search);
     }
 
     public Mono<ItemDto> updateCountInCart(Long itemId, String action, Long userId) {

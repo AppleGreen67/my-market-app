@@ -2,12 +2,15 @@ package ru.yandex.practicum.mymarket.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.mymarket.controller.request.ChangeCountRequest;
+import ru.yandex.practicum.mymarket.controller.request.ChangeItemCountRequest;
 import ru.yandex.practicum.mymarket.dto.Paging;
 import ru.yandex.practicum.mymarket.service.ItemsService;
 import ru.yandex.practicum.mymarket.service.user.IUserService;
@@ -48,20 +51,25 @@ public class ItemsController {
     }
 
     @PostMapping
-    public Mono<String> changeCount(@RequestParam(name = "id") Long id,
-                                    @RequestParam(name = "search", required = false) String search,
-                                    @RequestParam(name = "sort", required = false) String sort,
-                                    @RequestParam(name = "pageNumber", required = false) String pageNumber,
-                                    @RequestParam(name = "pageSize", required = false) String pageSize,
-                                    @RequestParam(name = "action") String action) {
-
+    public Mono<String> changeCount(@ModelAttribute ChangeCountRequest request) {
+        String action = request.getAction();
         if (!("MINUS".equals(action) || "PLUS".equals(action))) {
             throw new UnsupportedOperationException();
         }
 
+        StringBuilder sb = new StringBuilder()
+                .append("redirect:/items?search=")
+                .append(request.getSearch())
+                .append("&sort=")
+                .append(request.getSort())
+                .append("&pageNumber=")
+                .append(request.getPageNumber())
+                .append("&pageSize=")
+                .append(request.getPageSize());
+
         return userService.getCurrentUserId()
-                .flatMap(userId -> itemsService.updateCountInCart(id, action, userId)
-                        .map(itemDto -> "redirect:/items?search=" + search + "&sort=" + sort + "&pageNumber=" + pageNumber + "&pageSize=" + pageSize));
+                .flatMap(userId -> itemsService.updateCountInCart(request.getId(), action, userId))
+                .then(Mono.just(sb.toString()));
     }
 
     @GetMapping("/{id}")
@@ -76,7 +84,8 @@ public class ItemsController {
 
     @PostMapping("/{id}")
     public Mono<Rendering> changeItemCount(@PathVariable(name = "id") Long id,
-                                           @RequestParam(name = "action") String action) {
+                                           @ModelAttribute ChangeItemCountRequest request) {
+        String action = request.getAction();
         if (!("MINUS".equals(action) || "PLUS".equals(action))) {
             throw new UnsupportedOperationException();
         }
