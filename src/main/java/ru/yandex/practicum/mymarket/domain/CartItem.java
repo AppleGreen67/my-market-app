@@ -1,19 +1,9 @@
 package ru.yandex.practicum.mymarket.domain;
 
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
-
-@Table(name = "cart_items")
 public class CartItem {
-    @Id
     private Long id;
-    @Column("item_id")
     private Long itemId;
-    @Column("user_id")
     private Long userId;
-    @Column("item_count")
     private Integer count;
 
     public Long getId() {
