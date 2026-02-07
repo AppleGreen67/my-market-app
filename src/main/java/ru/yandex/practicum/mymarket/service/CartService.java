@@ -1,82 +1,58 @@
 package ru.yandex.practicum.mymarket.service;
 
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.mymarket.domain.Cart;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.domain.CartItem;
-import ru.yandex.practicum.mymarket.domain.Item;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
-import ru.yandex.practicum.mymarket.mapper.ItemDtoMapper;
-import ru.yandex.practicum.mymarket.repository.CartRepository;
-import ru.yandex.practicum.mymarket.repository.ItemRepository;
+import ru.yandex.practicum.mymarket.repository.CartDatabaseClientRepository;
+import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class CartService {
 
-    private final CartRepository cartRepository;
-    private final ItemRepository itemRepository;
+    private final ItemDatabaseClientRepository itemRepository;
+    private final CartDatabaseClientRepository cartDatabaseClientRepository;
 
-    public CartService(CartRepository cartRepository, ItemRepository itemRepository) {
-        this.cartRepository = cartRepository;
+    public CartService(ItemDatabaseClientRepository itemRepository, CartDatabaseClientRepository cartDatabaseClientRepository) {
         this.itemRepository = itemRepository;
+        this.cartDatabaseClientRepository = cartDatabaseClientRepository;
     }
 
-    public List<ItemDto> getCartItems(Long userId) {
-        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
-
-        return cartOptional.map(cart -> cart.getItems().stream()
-                .map(ItemDtoMapper::mapp).toList()).orElseGet(ArrayList::new);
-
+    public Flux<ItemDto> getCartItems(Long userId) {
+        return cartDatabaseClientRepository.findByUserId(userId);
     }
 
-    @Transactional
-    public List<ItemDto> updateCart(Long id, String action, Long userId) {
-        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
-        Cart cart;
-        if (cartOptional.isEmpty()) {
-            cart = new Cart();
-            cart.setUserId(userId);
-            cartRepository.save(cart);
-        } else {
-            cart = cartOptional.get();
-        }
-
-        Optional<CartItem> cartItemOptional = findCartItemByItem(cart, id);
-        if (cartItemOptional.isEmpty()) {
-            Optional<Item> itemOptional = itemRepository.findById(id);
-            if (itemOptional.isEmpty()) throw new NoSuchElementException();
-
-            CartItem cartItem = new CartItem();
-            cartItem.setCart(cart);
-            cartItem.setCount(1);
-            cartItem.setItem(itemOptional.get());
-
-            cart.getItems().add(cartItem);
-        } else {
-            CartItem cartItem = cartItemOptional.get();
-
-            Integer newCount = getCount(cartItem.getCount(), action);
-            if (newCount == 0)
-                cart.getItems().remove(cartItem);
-            else
-                cartItem.setCount(newCount);
-        }
-
-        cartRepository.save(cart);
-
-        return cart.getItems().stream()
-                .map(ItemDtoMapper::mapp).toList();
+    public Flux<ItemDto> updateCart(Long itemId, String action, Long userId) {
+        return cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)
+                .flatMap(itemDto -> {
+                    Integer newCount = getCount(itemDto.getCount(), action);
+                    if (newCount == 0)
+                        return cartDatabaseClientRepository.deleteItem(userId, itemId);
+                    else
+                        return cartDatabaseClientRepository.updateItem(userId, itemId, newCount);
+                })
+                .switchIfEmpty(addItem(userId, itemId))
+                .thenMany(cartDatabaseClientRepository.findByUserId(userId));
     }
 
-    public Optional<CartItem> findCartItemByItem(Cart cart, Long itemId) {
-        return cart.getItems().stream()
-                .filter(cartItem -> cartItem.getItem().getId().equals(itemId))
-                .findFirst();
+    private Mono<Long> addItem(Long userId, Long itemId) {
+        return itemRepository.findById(itemId)
+                .map(item -> {
+                    CartItem cartItem = new CartItem();
+                    cartItem.setUserId(userId);
+                    cartItem.setCount(1);
+                    cartItem.setItemId(itemId);
+                    return cartItem;
+                })
+                .switchIfEmpty((Mono.error(new NoSuchElementException("Не найдет товар в корзине с id=" + itemId))))
+                .flatMap(cartDatabaseClientRepository::saveItem);
+    }
+
+    public Mono<Long> deleteAll(Long userId) {
+        return cartDatabaseClientRepository.deleteAll(userId);
     }
 
     private Integer getCount(Integer count, String action) {

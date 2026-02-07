@@ -5,237 +5,187 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import ru.yandex.practicum.mymarket.domain.Cart;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import ru.yandex.practicum.mymarket.domain.CartItem;
-import ru.yandex.practicum.mymarket.domain.Item;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
-import ru.yandex.practicum.mymarket.repository.CartRepository;
-import ru.yandex.practicum.mymarket.repository.ItemRepository;
-
-import java.util.List;
-import java.util.Optional;
+import ru.yandex.practicum.mymarket.repository.CartDatabaseClientRepository;
+import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.yandex.practicum.mymarket.utils.ItemsUtils.getItem;
 
 @SpringBootTest(classes = CartService.class)
 class CartServiceTest {
 
     @MockitoBean
-    private CartRepository cartRepository;
+    private CartDatabaseClientRepository cartDatabaseClientRepository;
     @MockitoBean
-    private ItemRepository itemRepository;
+    private ItemDatabaseClientRepository itemRepository;
 
     @Autowired
     private CartService service;
 
     @BeforeEach
     void setUp() {
-        clearInvocations(cartRepository);
+        clearInvocations(cartDatabaseClientRepository);
         clearInvocations(itemRepository);
-    }
-
-    @Test
-    void getCartItems_noCart() {
-        Long userId = 1L;
-
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.empty());
-
-        List<ItemDto> cartItems = service.getCartItems(userId);
-        assertEquals(0, cartItems.size());
     }
 
     @Test
     void getCartItems() {
         Long userId = 1L;
 
-        CartItem cartItem = new CartItem();
-        cartItem.setId(1L);
-        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-        cartItem.setCount(3);
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(2L);
+        itemDto1.setCount(12);
 
-        Cart cart = new Cart();
-        cart.getItems().add(cartItem);
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(1L);
+        itemDto.setTitle("Бейсболка черная");
+        itemDto.setCount(1);
 
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
+        when(cartDatabaseClientRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto, itemDto1));
 
-        List<ItemDto> cartItems = service.getCartItems(userId);
-        assertEquals(1, cartItems.size());
-        assertEquals(2L, cartItems.getFirst().getId());
-        assertEquals("title2", cartItems.getFirst().getTitle());
-        assertEquals("description2", cartItems.getFirst().getDescription());
-        assertEquals("imagePath", cartItems.getFirst().getImgPath());
-        assertEquals(3, cartItems.getFirst().getCount());
+        StepVerifier.create(service.getCartItems(userId))
+                .expectNextCount(2)
+                .verifyComplete();
+
+        verify(cartDatabaseClientRepository).findByUserId(userId);
     }
 
     @Test
-    void updateCart_noCart() {
+    void updateCart_update() {
         Long userId = 1L;
 
-        Long id = 1L;
+        Long itemId = 1L;
         String action = "PLUS";
 
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(itemRepository.findById(itemId)).thenReturn(Mono.just(new ItemDto()));
 
-        Item item = getItem(1L, "title1", "description1", "imagePath", 4);
-        when(itemRepository.findById(id)).thenReturn(Optional.of(item));
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(2L);
+        itemDto1.setCount(12);
 
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(itemId);
+        itemDto.setTitle("Бейсболка черная");
+        itemDto.setCount(1);
 
-        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-        assertEquals(1, itemDtoList.size());
-        assertEquals(1, itemDtoList.getFirst().getId());
-        assertEquals(1, itemDtoList.getFirst().getCount());
+        when(cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.just(itemDto));
 
-        verify(cartRepository).findByUserId(userId);
-        verify(itemRepository).findById(id);
-        verify(cartRepository, times(2)).save(any(Cart.class));
-    }
+        doAnswer(invocationOnMock -> {
+            itemDto.setCount(invocationOnMock.getArgument(2));
+            return Mono.just(1L);
+        }).when(cartDatabaseClientRepository).updateItem(eq(userId), eq(itemId), anyInt());
 
-    @Test
-    void updateCart_noCartItem() {
-        Long userId = 1L;
+        when(cartDatabaseClientRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto, itemDto1));
 
-        Long id = 1L;
-        String action = "PLUS";
+        StepVerifier.create(service.updateCart(itemId, action, userId))
+                .expectNextMatches(dto -> {
+                    assertEquals(itemId, dto.getId());
+                    assertEquals(2, itemDto.getCount());
+                    return true;
+                })
+                .expectNextCount(1)
+                .verifyComplete();
 
-        CartItem cartItem = new CartItem();
-        cartItem.setId(1L);
-        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-        cartItem.setCount(3);
-
-        Cart cart = new Cart();
-        cart.getItems().add(cartItem);
-
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
-
-        Item item = getItem(1L, "title1", "description1", "imagePath", 4);
-        when(itemRepository.findById(id)).thenReturn(Optional.of(item));
-
-
-        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-        assertEquals(2, itemDtoList.size());
-        assertEquals(2, itemDtoList.get(0).getId());
-        assertEquals(3, itemDtoList.get(0).getCount());
-
-        assertEquals(1, itemDtoList.get(1).getId());
-        assertEquals(1, itemDtoList.get(1).getCount());
-
-        verify(cartRepository).findByUserId(userId);
-        verify(itemRepository).findById(id);
-        verify(cartRepository, times(1)).save(any(Cart.class));
-    }
-
-    @Test
-    void updateCart_plus() {
-        Long userId = 1L;
-
-        Long id = 2L;
-        String action = "PLUS";
-
-        CartItem cartItem = new CartItem();
-        cartItem.setId(1L);
-        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-        cartItem.setCount(3);
-
-        Cart cart = new Cart();
-        cart.getItems().add(cartItem);
-
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
-
-        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-        assertEquals(1, itemDtoList.size());
-        assertEquals(2, itemDtoList.getFirst().getId());
-        assertEquals(4, itemDtoList.getFirst().getCount());
-
-        verify(cartRepository).findByUserId(userId);
-        verify(itemRepository, never()).findById(id);
-        verify(cartRepository, times(1)).save(any(Cart.class));
-    }
-
-    @Test
-    void updateCart_minus() {
-        Long userId = 1L;
-
-        Long id = 2L;
-        String action = "MINUS";
-
-        CartItem cartItem = new CartItem();
-        cartItem.setId(1L);
-        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-        cartItem.setCount(3);
-
-        Cart cart = new Cart();
-        cart.getItems().add(cartItem);
-
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
-
-        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-        assertEquals(1, itemDtoList.size());
-        assertEquals(2, itemDtoList.getFirst().getId());
-        assertEquals(2, itemDtoList.getFirst().getCount());
-
-        verify(cartRepository).findByUserId(userId);
-        verify(itemRepository, never()).findById(id);
-        verify(cartRepository, times(1)).save(any(Cart.class));
+        verify(cartDatabaseClientRepository).findByUserIdAndItemId(userId, itemId);
+        verify(cartDatabaseClientRepository).findByUserId(userId);
+        verify(cartDatabaseClientRepository).updateItem(eq(userId), eq(itemId), anyInt());
+        verify(cartDatabaseClientRepository, never()).deleteItem(eq(userId), eq(itemId));
+        verify(itemRepository).findById(itemId);
+        verify(cartDatabaseClientRepository, never()).saveItem(any(CartItem.class));
     }
 
     @Test
     void updateCart_delete() {
         Long userId = 1L;
 
-        Long id = 2L;
-        String action = "DELETE";
+        Long itemId = 1L;
+        String action = "MINUS";
 
-        CartItem cartItem = new CartItem();
-        cartItem.setId(1L);
-        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-        cartItem.setCount(3);
+        when(itemRepository.findById(itemId)).thenReturn(Mono.just(new ItemDto()));
 
-        Cart cart = new Cart();
-        cart.getItems().add(cartItem);
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(2L);
+        itemDto1.setCount(12);
 
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(itemId);
+        itemDto.setTitle("Бейсболка черная");
+        itemDto.setCount(1);
 
-        List<ItemDto> itemDtoList = service.updateCart(id, action, userId);
-        assertEquals(0, itemDtoList.size());
+        when(cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.just(itemDto));
 
-        verify(cartRepository).findByUserId(userId);
-        verify(itemRepository, never()).findById(id);
-        verify(cartRepository, times(1)).save(any(Cart.class));
+        when(cartDatabaseClientRepository.deleteItem(eq(userId), eq(itemId))).thenReturn(Mono.just(1L));
+
+        when(cartDatabaseClientRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto1));
+
+        StepVerifier.create(service.updateCart(itemId, action, userId))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        verify(cartDatabaseClientRepository).findByUserIdAndItemId(userId, itemId);
+        verify(cartDatabaseClientRepository).findByUserId(userId);
+        verify(cartDatabaseClientRepository, never()).updateItem(eq(userId), eq(itemId), anyInt());
+        verify(cartDatabaseClientRepository).deleteItem(eq(userId), eq(itemId));
+        verify(itemRepository).findById(itemId);
+        verify(cartDatabaseClientRepository, never()).saveItem(any(CartItem.class));
     }
 
     @Test
-    void findCartItemByItem() {
-        CartItem cartItem = new CartItem();
-        cartItem.setId(1L);
-        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 2L));
-        cartItem.setCount(3);
+    void updateCart_noCartItem() {
+        Long userId = 1L;
 
-        CartItem cartItem2 = new CartItem();
-        cartItem2.setId(2L);
-        cartItem2.setItem(getItem(3L, "title3", "description3", "imagePath", 11L));
-        cartItem2.setCount(3);
+        Long itemId = 1L;
+        String action = "PLUS";
 
-        Cart cart = new Cart();
-        cart.getItems().add(cartItem);
-        cart.getItems().add(cartItem2);
+        when(cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.empty());
 
+        ItemDto foundedItem = new ItemDto();
+        foundedItem.setId(itemId);
+        foundedItem.setTitle("Бейсболка черная");
+        foundedItem.setDescription("Очень модная бейсболка черного цвета");
+        foundedItem.setImgPath("2.jpg");
+        foundedItem.setPrice(1500L);
+        when(itemRepository.findById(itemId)).thenReturn(Mono.just(foundedItem));
 
-        Optional<CartItem> cartItemByItem = service.findCartItemByItem(cart, 2L);
-        assertTrue(cartItemByItem.isPresent());
-        assertEquals(2L, cartItemByItem.get().getItem().getId());
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(2L);
+        itemDto1.setCount(12);
 
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(1L);
 
-        cartItemByItem = service.findCartItemByItem(cart, 4L);
-        assertFalse(cartItemByItem.isPresent());
+        when(cartDatabaseClientRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto, itemDto1));
+
+        doAnswer(invocationOnMock -> {
+            CartItem cartItem = invocationOnMock.getArgument(0);
+            assertEquals(userId, cartItem.getUserId());
+            assertEquals(itemId, cartItem.getItemId());
+            assertEquals(1, cartItem.getCount());
+            return Mono.just(1L);
+        }).when(cartDatabaseClientRepository).saveItem(any());
+
+        StepVerifier.create(service.updateCart(itemId, action, userId))
+                .expectNextCount(2)
+                .verifyComplete();
+
+        verify(cartDatabaseClientRepository).findByUserIdAndItemId(userId, itemId);
+        verify(cartDatabaseClientRepository).findByUserId(userId);
+        verify(cartDatabaseClientRepository, never()).updateItem(eq(userId), eq(itemId), anyInt());
+        verify(cartDatabaseClientRepository, never()).deleteItem(eq(userId), eq(itemId));
+        verify(itemRepository).findById(itemId);
+        verify(cartDatabaseClientRepository).saveItem(any(CartItem.class));
     }
 
 }

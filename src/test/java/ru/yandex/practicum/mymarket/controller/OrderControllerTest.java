@@ -3,71 +3,89 @@ package ru.yandex.practicum.mymarket.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.mymarket.dto.ItemDto;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.dto.OrderDto;
 import ru.yandex.practicum.mymarket.dto.OrderItemDto;
 import ru.yandex.practicum.mymarket.service.OrderService;
+import ru.yandex.practicum.mymarket.service.user.IUserService;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(OrderController.class)
+@WebFluxTest(OrderController.class)
 class OrderControllerTest {
 
+    @MockitoBean
+    private IUserService userService;
     @MockitoBean
     private OrderService orderService;
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @BeforeEach
     void beforeTest() {
         clearInvocations(orderService);
+        clearInvocations(userService);
     }
 
     @Test
-    void getOrders() throws Exception {
+    void getOrders() {
         List<OrderItemDto> items = Arrays.asList(new OrderItemDto(1L, "title1", 11L, 111),
                 new OrderItemDto(2L, "title2", 22L, 222),
                 new OrderItemDto(3L, "title3", 33L, 333));
 
-        when(orderService.getOrders()).thenReturn(Collections.singletonList(new OrderDto(1L, items, 8090L)));
+        Long userId = 17L;
+        when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
-        mockMvc.perform(get("/orders"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Сумма: 8090 руб.")))
-                .andExpect(content().contentType("text/html;charset=UTF-8"));
+        when(orderService.getOrders(userId))
+                .thenReturn(Flux.just(new OrderDto(1L, items, 8090L)));
 
-        verify(orderService).getOrders();
+        webTestClient.get()
+                .uri("/orders")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith("text/html;charset=UTF-8")
+                .expectBody(String.class)
+                .value(html -> {
+                    assert html.contains("Сумма: 8090 руб.");
+                });
+
+        verify(orderService).getOrders(any());
     }
 
     @Test
-    void getOrder() throws Exception {
-        long id = 1;
+    void getOrder() {
+        Long orderId = 1L;
+        Long userId = 17l;
 
         List<OrderItemDto> items = Arrays.asList(new OrderItemDto(1L, "title1", 11L, 111),
                 new OrderItemDto(2L, "title2", 22L, 222),
                 new OrderItemDto(3L, "title3", 33L, 333));
 
-        when(orderService.find(id)).thenReturn(new OrderDto(1L, items, 7890L));
+        when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
-        mockMvc.perform(get("/orders/{id}?newOrder={newOrder}", id, false))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Сумма: 7890 руб.")))
-                .andExpect(content().contentType("text/html;charset=UTF-8"));
+        when(orderService.find(userId, orderId)).thenReturn(Mono.just(new OrderDto(1L, items, 7890L)));
 
-        verify(orderService).find(id);
+        webTestClient.get()
+                .uri("/orders/{id}?newOrder={newOrder}", orderId, false)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith("text/html;charset=UTF-8")
+                .expectBody(String.class)
+                .value(html -> {
+                    assert html.contains("Сумма: 7890 руб.");
+                });
+
+        verify(orderService).find(userId, orderId);
     }
 }

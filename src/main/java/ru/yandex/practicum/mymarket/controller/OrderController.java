@@ -1,39 +1,43 @@
 package ru.yandex.practicum.mymarket.controller;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import ru.yandex.practicum.mymarket.dto.OrderDto;
+import org.springframework.web.reactive.result.view.Rendering;
+import reactor.core.publisher.Mono;
+import ru.yandex.practicum.mymarket.controller.request.OrderRequest;
 import ru.yandex.practicum.mymarket.service.OrderService;
-
-import java.util.List;
+import ru.yandex.practicum.mymarket.service.user.IUserService;
 
 @Controller
 @RequestMapping("/orders")
 public class OrderController {
 
+    private final IUserService userService;
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(IUserService userService, OrderService orderService) {
+        this.userService = userService;
         this.orderService = orderService;
     }
 
     @GetMapping
-    public String getOrders(Model model) {
-        List<OrderDto> orders = orderService.getOrders();
-        model.addAttribute("orders", orders);
-        return "orders";
+    public Mono<Rendering> getOrders() {
+        return userService.getCurrentUserId()
+                .flatMap(userId-> Mono.just(Rendering.view("orders")
+                        .modelAttribute("orders", orderService.getOrders(userId))
+                        .build()));
     }
 
     @GetMapping("/{id}")
-    public String getOrder(@PathVariable(name = "id") Long id,
-                           @RequestParam(name = "newOrder", required = false) String newOrder,
-                           Model model) {
-        OrderDto order = orderService.find(id);
-        model.addAttribute("order", order);
-        return "order";
+    public Mono<Rendering> getOrder(@PathVariable(name = "id") Long id,
+                                    @ModelAttribute OrderRequest request) {
+
+        return userService.getCurrentUserId()
+                .flatMap(userId-> Mono.just(Rendering.view("order")
+                .modelAttribute("order", orderService.find(userId, id))
+                .build()));
     }
 }

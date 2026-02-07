@@ -4,32 +4,28 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import ru.yandex.practicum.mymarket.domain.Cart;
-import ru.yandex.practicum.mymarket.domain.CartItem;
-import ru.yandex.practicum.mymarket.domain.Order;
-import ru.yandex.practicum.mymarket.repository.CartRepository;
-import ru.yandex.practicum.mymarket.repository.OrderRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+import ru.yandex.practicum.mymarket.dto.ItemDto;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static ru.yandex.practicum.mymarket.utils.ItemsUtils.getItem;
 
 @SpringBootTest(classes = BuyService.class)
 class BuyServiceTest {
 
     @MockitoBean
-    private CartRepository cartRepository;
+    private CartService cartService;
     @MockitoBean
-    private OrderRepository orderRepository;
+    private OrderService orderService;
 
     @Autowired
     private BuyService service;
@@ -38,53 +34,39 @@ class BuyServiceTest {
     void buy_noCart_exception() {
         Long userId = 1L;
 
-        try {
-            service.buy(userId);
-            fail();
-        } catch (Exception e) {
-            assertInstanceOf(NoSuchElementException.class, e);
-        }
+        when(cartService.getCartItems(userId)).thenReturn(Flux.empty());
 
-        verify(cartRepository).findByUserId(userId);
-        verify(orderRepository, never()).save(any());
-        verify(cartRepository, never()).save(any());
+        StepVerifier.create(service.buy(userId))
+                .expectError(NoSuchElementException.class)
+                .verify();
+
+        verify(cartService).getCartItems(userId);
+        verify(orderService, never()).create(userId);
+        verify(orderService, never()).saveItems(anyList(), any());
     }
 
     @Test
     void buy() {
-        Long userId = 1L;
+        Long userId = 17L;
 
-        CartItem cartItem = new CartItem();
-        cartItem.setId(1L);
-        cartItem.setItem(getItem(2L, "title2", "description2", "imagePath", 22L));
-        cartItem.setCount(3);
+        when(cartService.getCartItems(userId)).thenReturn(Flux.just(new ItemDto(), new ItemDto()));
 
-        Cart cart = new Cart();
-        cart.getItems().add(cartItem);
+        Long orderId = 1L;
+        when(orderService.create(userId)).thenReturn(Mono.just(orderId));
 
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
+        when(orderService.saveItems(anyList(), eq(orderId))).thenReturn(Mono.just(2L));
+        when(cartService.deleteAll(userId)).thenReturn(Mono.just(2L));
 
-        doAnswer(in -> {
-            Order orderInSave = in.getArgument(0);
-            orderInSave.setId(1L);
+        StepVerifier.create(service.buy(userId))
+                .expectNextMatches(buyId -> {
+                    assertEquals(orderId, buyId);
+                    return true;
+                })
+                .verifyComplete();
 
-            assertEquals(1, orderInSave.getOrderItems().size());
-            assertEquals(cartItem.getCount(), orderInSave.getOrderItems().getFirst().getCount());
-
-            return orderInSave;
-        }).when(orderRepository).save(any(Order.class));
-
-        doAnswer(in -> {
-            Cart cartInSave = in.getArgument(0);
-
-            assertEquals(0, cartInSave.getItems().size());
-
-            return cartInSave;
-        }).when(cartRepository).save(any(Cart.class));
-
-        Long orderId = service.buy(userId);
-        assertEquals(1, orderId);
-
-        verify(cartRepository).findByUserId(userId);
+        verify(cartService).getCartItems(userId);
+        verify(cartService).deleteAll(userId);
+        verify(orderService).create(userId);
+        verify(orderService).saveItems(anyList(), eq(orderId));
     }
 }

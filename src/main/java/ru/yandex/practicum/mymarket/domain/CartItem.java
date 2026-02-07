@@ -1,30 +1,9 @@
 package ru.yandex.practicum.mymarket.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "cart_items")
 public class CartItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
-    private Item item;
-
-    @ManyToOne
-    @JoinColumn(name = "cart_id", nullable = false)
-    private Cart cart;
-
-    @Column(name = "item_count")
+    private Long itemId;
+    private Long userId;
     private Integer count;
 
     public Long getId() {
@@ -35,20 +14,20 @@ public class CartItem {
         this.id = id;
     }
 
-    public Item getItem() {
-        return item;
+    public Long getItemId() {
+        return itemId;
     }
 
-    public void setItem(Item item) {
-        this.item = item;
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
     }
 
-    public Cart getCart() {
-        return cart;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setCart(Cart cart) {
-        this.cart = cart;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Integer getCount() {
