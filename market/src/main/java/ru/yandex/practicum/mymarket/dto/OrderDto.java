@@ -1,5 +1,7 @@
 package ru.yandex.practicum.mymarket.dto;
 
+import ru.yandex.practicum.mymarket.dto.OrderItemDto;
+
 import java.util.List;
 
 public class OrderDto {
