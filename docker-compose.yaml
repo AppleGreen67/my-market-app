@@ -3,7 +3,26 @@ version: '3.8'
 services:
   market:
     container_name: market_c
-    build: .
+    build:
+      context: .
+      dockerfile: market/Dockerfile
     restart: always
     ports:
       - "8080:8080"
+    networks:
+      - app-network
+
+  pay:
+    container_name: pay_c
+    build:
+      context: .
+      dockerfile: pay-service/Dockerfile
+    restart: always
+    ports:
+      - "8081:8080"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
