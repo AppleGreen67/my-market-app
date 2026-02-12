@@ -1,5 +1,6 @@
 package ru.yandex.practicum.mymarket.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -7,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.controller.request.ChangeCountRequest;
@@ -32,6 +35,13 @@ public class ItemsController {
                                     @RequestParam(name = "sort", required = false) String sortParam,
                                     @RequestParam(name = "pageNumber", required = false) String number,
                                     @RequestParam(name = "pageSize", required = false) String size) {
+
+        WebClient webClient = WebClient.create("http://pay:8080");
+        Mono<String> responseBody = webClient.get()
+                .uri("/pay")
+                .retrieve()
+                .bodyToMono(String.class);
+        responseBody.subscribe(System.out::println);
 
         String sort = sortParam == null || sortParam.isEmpty() ? "NO" : sortParam;
 
