@@ -1,5 +1,6 @@
 package ru.yandex.practicum.mymarket.service;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -33,7 +34,9 @@ public class ItemsService {
     }
 
     @Transactional
-    public Mono<ItemDto> find(Long itemId, Long userId) {
-        return itemRepository.findById(itemId);
+    @Cacheable(value = "item", key = "#id")
+    public Mono<ItemDto> find(Long id, Long userId) {
+        System.out.println("Читаю из репозитория для id=" + id);
+        return itemRepository.findById(id);
     }
 }

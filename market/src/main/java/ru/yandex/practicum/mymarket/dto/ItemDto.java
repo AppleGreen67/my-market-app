@@ -1,8 +1,11 @@
 package ru.yandex.practicum.mymarket.dto;
 
-import ru.yandex.practicum.mymarket.dto.IItem;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 
-public class ItemDto implements IItem {
+@RedisHash(value = "item")
+public class ItemDto implements IItem{
+    @Id
     private Long id;
     private String title;
     private String description;
