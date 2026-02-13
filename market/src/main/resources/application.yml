@@ -13,6 +13,14 @@ spring:
     init:
       mode: always
       data-locations: classpath:sql/data.sql
+  data:
+    redis:
+      host: redis-server
+      port: 6379
+    cache:
+      redis:
+        time-to-live: PT10M    # TTL по умолчанию для кешей
+
 
 logging:
   level:
