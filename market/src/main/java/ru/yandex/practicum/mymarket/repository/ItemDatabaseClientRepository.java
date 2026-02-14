@@ -19,8 +19,7 @@ public class ItemDatabaseClientRepository {
     public Flux<ItemDto> findAll(String search, String sort, Integer pageNumber, Integer pageSize) {
         StringBuilder sb = new StringBuilder()
                 .append("""
-                        select i.*, coalesce(ci.item_count, 0) as item_count from items i
-                        left join cart_items ci on ci.item_id = i.id
+                        select i.* from items i
                         """);
         if (search!= null && !search.isBlank())
             sb.append("where title like '%%%s%%' or description like '%%%s%%'".formatted(search, search));
@@ -42,7 +41,7 @@ public class ItemDatabaseClientRepository {
                                 row.get("description", String.class),
                                 row.get("img_path", String.class),
                                 row.get("price", Long.class),
-                                row.get("item_count", Integer.class)
+                                0
                         ))
                 .all();
     }
@@ -79,6 +78,7 @@ public class ItemDatabaseClientRepository {
                     itemDto.setDescription(row.get("description", String.class));
                     itemDto.setImgPath(row.get("img_path", String.class));
                     itemDto.setPrice(row.get("price", Long.class));
+                    itemDto.setCount(0);
                     return itemDto;
                 })
                 .one();

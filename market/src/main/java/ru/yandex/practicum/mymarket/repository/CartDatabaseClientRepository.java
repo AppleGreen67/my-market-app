@@ -7,6 +7,8 @@ import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.domain.CartItem;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 
+import java.util.List;
+
 @Repository
 public class CartDatabaseClientRepository {
 
@@ -51,6 +53,25 @@ public class CartDatabaseClientRepository {
                 .one().switchIfEmpty(Mono.empty());
     }
 
+
+    public Flux<CartItem> findItems(Long userId, List<Long> itemIds) {
+        return databaseClient.sql("""
+                        select ci.* from cart_items ci
+                        where ci.user_id = :user_id and ci.item_id in (:item_ids)
+                        """)
+                .bind("user_id", userId)
+                .bind("item_ids", itemIds)
+                .map((row, metadata) -> {
+                    CartItem cartItem = new CartItem();
+                    cartItem.setId(row.get("id", Long.class));
+                    cartItem.setItemId(row.get("item_id", Long.class));
+                    cartItem.setUserId(row.get("user_id", Long.class));
+                    cartItem.setCount(row.get("item_count", Integer.class));
+                    return cartItem;
+                })
+                .all()
+                .switchIfEmpty(Flux.empty());
+    }
 
     public Mono<CartItem> findItem(Long userId, Long id) {
         return databaseClient.sql("""
