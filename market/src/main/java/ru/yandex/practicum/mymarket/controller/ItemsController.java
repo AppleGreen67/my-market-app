@@ -1,6 +1,5 @@
 package ru.yandex.practicum.mymarket.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -8,8 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.controller.request.ChangeCountRequest;
@@ -78,7 +75,8 @@ public class ItemsController {
                 .append(request.getPageSize());
 
         return userService.getCurrentUserId()
-                .flatMap(userId -> itemsService.updateCountInCart(request.getId(), action, userId))
+                .flatMap(userId -> itemsService.updateCountInCart(request.getId(), action, userId)
+                        .then(itemsService.find(request.getId(), userId)))
                 .then(Mono.just(sb.toString()));
     }
 
@@ -102,6 +100,7 @@ public class ItemsController {
 
         return userService.getCurrentUserId()
                 .flatMap(userId -> itemsService.updateCountInCart(id, action, userId)
+                            .then(itemsService.find(id, userId))
                         .map(itemDto -> Rendering.view("item")
                                 .modelAttribute("item", itemDto)
                                 .build()));

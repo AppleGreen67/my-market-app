@@ -25,17 +25,16 @@ public class CartService {
         return cartDatabaseClientRepository.findByUserId(userId);
     }
 
-    public Flux<ItemDto> updateCart(Long itemId, String action, Long userId) {
+    public Mono<Long> updateCart(Long itemId, String action, Long userId) {
         return cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)
-                .flatMap(itemDto -> {
-                    Integer newCount = getCount(itemDto.getCount(), action);
+                .flatMap(cartItem -> {
+                    Integer newCount = getCount(cartItem.getCount(), action);
                     if (newCount == 0)
                         return cartDatabaseClientRepository.deleteItem(userId, itemId);
                     else
                         return cartDatabaseClientRepository.updateItem(userId, itemId, newCount);
                 })
-                .switchIfEmpty(addItem(userId, itemId))
-                .thenMany(cartDatabaseClientRepository.findByUserId(userId));
+                .switchIfEmpty(addItem(userId, itemId));
     }
 
     private Mono<Long> addItem(Long userId, Long itemId) {

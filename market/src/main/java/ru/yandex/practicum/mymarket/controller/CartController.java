@@ -50,7 +50,9 @@ public class CartController {
 
         return userService.getCurrentUserId()
                 .flatMap(userId -> {
-                            Flux<ItemDto> itemDtoFlux = cartService.updateCart(request.getId(), action, userId).cache();
+                            Flux<ItemDto> itemDtoFlux = cartService.updateCart(request.getId(), action, userId)
+                                    .thenMany(cartService.getCartItems(userId))
+                                    .cache();
                             return Mono.just(Rendering.view("cart")
                                     .modelAttribute("total", sumService.calculateSum(itemDtoFlux))
                                     .modelAttribute("items", itemDtoFlux)

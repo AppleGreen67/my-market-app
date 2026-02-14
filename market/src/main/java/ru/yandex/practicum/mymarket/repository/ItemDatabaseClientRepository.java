@@ -1,5 +1,6 @@
 package ru.yandex.practicum.mymarket.repository;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -63,21 +64,23 @@ public class ItemDatabaseClientRepository {
                 .all();
     }
 
-    public Mono<ItemDto> findById(Long itemId) {
+    @Cacheable(value = "item",key = "#id")
+    public Mono<ItemDto> findById(Long id) {
+        System.out.println("findById from ItemDatabaseClientRepository");
         return databaseClient.sql("""
-                        select i.*, coalesce(ci.item_count, 0) as item_count from items i
-                        left join cart_items ci on ci.item_id = i.id
+                        select i.* from items i
                         where i.id=:id
                         """)
-                .bind("id", itemId)
-                .map((row, metadata) -> new ItemDto(
-                        row.get("id", Long.class),
-                        row.get("title", String.class),
-                        row.get("description", String.class),
-                        row.get("img_path", String.class),
-                        row.get("price", Long.class),
-                        row.get("item_count", Integer.class)
-                ))
+                .bind("id", id)
+                .map((row, metadata) -> {
+                    ItemDto itemDto = new ItemDto();
+                    itemDto.setId(row.get("id", Long.class));
+                    itemDto.setTitle(row.get("title", String.class));
+                    itemDto.setDescription(row.get("description", String.class));
+                    itemDto.setImgPath(row.get("img_path", String.class));
+                    itemDto.setPrice(row.get("price", Long.class));
+                    return itemDto;
+                })
                 .one();
     }
 }

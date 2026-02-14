@@ -34,23 +34,41 @@ public class CartDatabaseClientRepository {
                 .all().switchIfEmpty(Flux.empty());
     }
 
-    public Mono<ItemDto> findByUserIdAndItemId(Long userId, Long itemId) {
+    public Mono<CartItem> findByUserIdAndItemId(Long userId, Long itemId) {
         return databaseClient.sql("""
-                        select i.*, ci.item_count as item_count, ci.user_id
-                        from items i right join cart_items ci on i.id = ci.item_id
-                        where ci.user_id = :user_id and i.id = :item_id""")
+                        select ci.* from cart_items ci
+                        where ci.user_id = :user_id and ci.item_id = :item_id""")
                 .bind("user_id", userId)
                 .bind("item_id", itemId)
-                .map((row, metadata) ->
-                        new ItemDto(
-                                row.get("id", Long.class),
-                                row.get("title", String.class),
-                                row.get("description", String.class),
-                                row.get("img_path", String.class),
-                                row.get("price", Long.class),
-                                row.get("item_count", Integer.class)
-                        ))
+                .map((row, metadata) -> {
+                    CartItem cartItem = new CartItem();
+                    cartItem.setId(row.get("id", Long.class));
+                    cartItem.setItemId(row.get("item_id", Long.class));
+                    cartItem.setUserId(row.get("user_id", Long.class));
+                    cartItem.setCount(row.get("item_count", Integer.class));
+                    return cartItem;
+                })
                 .one().switchIfEmpty(Mono.empty());
+    }
+
+
+    public Mono<CartItem> findItem(Long userId, Long id) {
+        return databaseClient.sql("""
+                        select ci.* from cart_items ci
+                        where ci.user_id = :user_id and ci.item_id = :item_id
+                        """)
+                .bind("user_id", userId)
+                .bind("item_id", id)
+                .map((row, metadata) -> {
+                    CartItem cartItem = new CartItem();
+                    cartItem.setId(row.get("id", Long.class));
+                    cartItem.setItemId(row.get("item_id", Long.class));
+                    cartItem.setUserId(row.get("user_id", Long.class));
+                    cartItem.setCount(row.get("item_count", Integer.class));
+                    return cartItem;
+                })
+                .one()
+                .switchIfEmpty(Mono.just(new CartItem()));
     }
 
     public Mono<Long> saveItem(CartItem cartItem) {

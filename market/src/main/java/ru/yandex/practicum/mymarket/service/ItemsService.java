@@ -1,25 +1,27 @@
 package ru.yandex.practicum.mymarket.service;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.mymarket.domain.CartItem;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
+import ru.yandex.practicum.mymarket.repository.CartDatabaseClientRepository;
 import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 import ru.yandex.practicum.mymarket.utils.ListUtils;
 
 import java.util.List;
-
 
 @Service
 public class ItemsService {
 
     private final CartService cartService;
     private final ItemDatabaseClientRepository itemRepository;
+    private final CartDatabaseClientRepository cartRepository;
 
-    public ItemsService(CartService cartService, ItemDatabaseClientRepository itemRepository) {
+    public ItemsService(CartService cartService, ItemDatabaseClientRepository itemRepository, CartDatabaseClientRepository cartRepository) {
         this.cartService = cartService;
         this.itemRepository = itemRepository;
+        this.cartRepository = cartRepository;
     }
 
     @Transactional
@@ -28,15 +30,18 @@ public class ItemsService {
                 .map(list -> ListUtils.partition(list, 3));
     }
 
-    public Mono<ItemDto> updateCountInCart(Long itemId, String action, Long userId) {
-        return cartService.updateCart(itemId, action, userId)
-                .filter(itemDto -> itemId.equals(itemDto.getId())).next();
+    public Mono<Long> updateCountInCart(Long id, String action, Long userId) {
+        return cartService.updateCart(id, action, userId);
     }
 
     @Transactional
-    @Cacheable(value = "item", key = "#id")
     public Mono<ItemDto> find(Long id, Long userId) {
-        System.out.println("Читаю из репозитория для id=" + id);
-        return itemRepository.findById(id);
+        return Mono.zip(itemRepository.findById(id), cartRepository.findItem(userId, id))
+                .map(tuple -> {
+                    ItemDto itemDto = tuple.getT1();
+                    CartItem cartItem = tuple.getT2();
+                    itemDto.setCount(cartItem.getCount() == null ? 0 : cartItem.getCount());
+                    return itemDto;
+                });
     }
 }
