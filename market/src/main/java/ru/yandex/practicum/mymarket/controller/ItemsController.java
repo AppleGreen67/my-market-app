@@ -52,7 +52,7 @@ public class ItemsController {
         return userService.getCurrentUserId()
                 .flatMap(userId -> Mono.just(
                         Rendering.view("items")
-                                .modelAttribute("items", itemsService.getItems(userId, search, sortParam, pageNumber, pageSize))
+                                .modelAttribute("items", itemsService.getItems(userId, search, sort, pageNumber, pageSize))
                                 .modelAttribute("paging", new Paging(pageNumber, pageSize))
                                 .build()));
     }
