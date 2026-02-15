@@ -1,8 +1,10 @@
 package ru.yandex.practicum.mymarket.cache;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 
@@ -19,6 +21,12 @@ public class ItemsCache {
     public ItemsCache(ItemDatabaseClientRepository itemRepository, ReactiveRedisTemplate<String, ItemDto> redisTemplate) {
         this.itemRepository = itemRepository;
         this.redisTemplate = redisTemplate;
+    }
+
+    @Cacheable(value = "item", key = "#id")
+    public Mono<ItemDto> findById(Long id) {
+        System.out.println("from DB for id=" + id);
+        return itemRepository.findById(id);
     }
 
     public Flux<ItemDto> findAll(Long userId, String search, String sort, Integer pageNumber, Integer pageSize) {

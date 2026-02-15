@@ -8,10 +8,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import ru.yandex.practicum.mymarket.cache.ItemsCache;
 import ru.yandex.practicum.mymarket.domain.CartItem;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.repository.CartDatabaseClientRepository;
-import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +29,7 @@ class CartServiceTest {
     @MockitoBean
     private CartDatabaseClientRepository cartDatabaseClientRepository;
     @MockitoBean
-    private ItemDatabaseClientRepository itemRepository;
+    private ItemsCache itemsCache;
 
     @Autowired
     private CartService service;
@@ -37,7 +37,7 @@ class CartServiceTest {
     @BeforeEach
     void setUp() {
         clearInvocations(cartDatabaseClientRepository);
-        clearInvocations(itemRepository);
+        clearInvocations(itemsCache);
     }
 
     @Test
@@ -69,7 +69,7 @@ class CartServiceTest {
         Long itemId = 1L;
         String action = "PLUS";
 
-        when(itemRepository.findById(itemId)).thenReturn(Mono.just(new ItemDto()));
+        when(itemsCache.findById(itemId)).thenReturn(Mono.just(new ItemDto()));
 
         ItemDto itemDto = new ItemDto();
         itemDto.setId(itemId);
@@ -98,7 +98,7 @@ class CartServiceTest {
         verify(cartDatabaseClientRepository).findByUserIdAndItemId(userId, itemId);
         verify(cartDatabaseClientRepository).updateItem(eq(userId), eq(itemId), anyInt());
         verify(cartDatabaseClientRepository, never()).deleteItem(eq(userId), eq(itemId));
-        verify(itemRepository).findById(itemId);
+        verify(itemsCache).findById(itemId);
         verify(cartDatabaseClientRepository, never()).saveItem(any(CartItem.class));
     }
 
@@ -109,7 +109,7 @@ class CartServiceTest {
         Long itemId = 1L;
         String action = "MINUS";
 
-        when(itemRepository.findById(itemId)).thenReturn(Mono.just(new ItemDto()));
+        when(itemsCache.findById(itemId)).thenReturn(Mono.just(new ItemDto()));
 
         CartItem cartItem = new CartItem();
         cartItem.setId(55L);
@@ -130,7 +130,7 @@ class CartServiceTest {
         verify(cartDatabaseClientRepository).findByUserIdAndItemId(userId, itemId);
         verify(cartDatabaseClientRepository, never()).updateItem(eq(userId), eq(itemId), anyInt());
         verify(cartDatabaseClientRepository).deleteItem(eq(userId), eq(itemId));
-        verify(itemRepository).findById(itemId);
+        verify(itemsCache).findById(itemId);
         verify(cartDatabaseClientRepository, never()).saveItem(any(CartItem.class));
     }
 
@@ -149,7 +149,7 @@ class CartServiceTest {
         foundedItem.setDescription("Очень модная бейсболка черного цвета");
         foundedItem.setImgPath("2.jpg");
         foundedItem.setPrice(1500L);
-        when(itemRepository.findById(itemId)).thenReturn(Mono.just(foundedItem));
+        when(itemsCache.findById(itemId)).thenReturn(Mono.just(foundedItem));
 
         ItemDto itemDto1 = new ItemDto();
         itemDto1.setId(2L);
@@ -178,7 +178,7 @@ class CartServiceTest {
         verify(cartDatabaseClientRepository).findByUserIdAndItemId(userId, itemId);
         verify(cartDatabaseClientRepository, never()).updateItem(eq(userId), eq(itemId), anyInt());
         verify(cartDatabaseClientRepository, never()).deleteItem(eq(userId), eq(itemId));
-        verify(itemRepository).findById(itemId);
+        verify(itemsCache).findById(itemId);
         verify(cartDatabaseClientRepository).saveItem(any(CartItem.class));
     }
 

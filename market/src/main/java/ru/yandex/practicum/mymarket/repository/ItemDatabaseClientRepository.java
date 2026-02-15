@@ -63,9 +63,7 @@ public class ItemDatabaseClientRepository {
                 .all();
     }
 
-    @Cacheable(value = "item",key = "#id")
     public Mono<ItemDto> findById(Long id) {
-        System.out.println("findById from ItemDatabaseClientRepository");
         return databaseClient.sql("""
                         select i.* from items i
                         where i.id=:id

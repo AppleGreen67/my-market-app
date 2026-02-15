@@ -25,8 +25,6 @@ class ItemsServiceTest {
     @MockitoBean
     private CartService cartService;
     @MockitoBean
-    private ItemDatabaseClientRepository itemRepository;
-    @MockitoBean
     private CartDatabaseClientRepository cartRepository;
 
     @Autowired
@@ -35,7 +33,8 @@ class ItemsServiceTest {
     @BeforeEach
     void setUp() {
         clearInvocations(cartService);
-        clearInvocations(itemRepository);
+        clearInvocations(itemsCache);
+        clearInvocations(cartRepository);
     }
 
     @Test
@@ -49,7 +48,7 @@ class ItemsServiceTest {
         itemDto.setDescription("Очень модная бейсболка черного цвета");
         itemDto.setImgPath("2.jpg");
         itemDto.setPrice(1500L);
-        when(itemRepository.findById(itemId)).thenReturn(Mono.just(itemDto));
+        when(itemsCache.findById(itemId)).thenReturn(Mono.just(itemDto));
 
 
         CartItem cartItem = new CartItem();

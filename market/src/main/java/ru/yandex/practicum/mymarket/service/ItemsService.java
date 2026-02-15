@@ -8,7 +8,6 @@ import ru.yandex.practicum.mymarket.cache.ItemsCache;
 import ru.yandex.practicum.mymarket.domain.CartItem;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.repository.CartDatabaseClientRepository;
-import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 import ru.yandex.practicum.mymarket.utils.ListUtils;
 
 import java.util.List;
@@ -18,13 +17,11 @@ public class ItemsService {
 
     private final ItemsCache itemsCache;
     private final CartService cartService;
-    private final ItemDatabaseClientRepository itemRepository;
     private final CartDatabaseClientRepository cartRepository;
 
-    public ItemsService(ItemsCache itemsCache, CartService cartService, ItemDatabaseClientRepository itemRepository, CartDatabaseClientRepository cartRepository) {
+    public ItemsService(ItemsCache itemsCache, CartService cartService, CartDatabaseClientRepository cartRepository) {
         this.itemsCache = itemsCache;
         this.cartService = cartService;
-        this.itemRepository = itemRepository;
         this.cartRepository = cartRepository;
     }
 
@@ -55,7 +52,7 @@ public class ItemsService {
 
     @Transactional
     public Mono<ItemDto> find(Long id, Long userId) {
-        return Mono.zip(itemRepository.findById(id), cartRepository.findItem(userId, id))
+        return Mono.zip(itemsCache.findById(id), cartRepository.findItem(userId, id))
                 .map(tuple -> {
                     ItemDto itemDto = tuple.getT1();
                     CartItem cartItem = tuple.getT2();
