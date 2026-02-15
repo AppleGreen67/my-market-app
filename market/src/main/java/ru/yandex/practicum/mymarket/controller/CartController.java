@@ -37,6 +37,7 @@ public class CartController {
                     return Mono.just(Rendering.view("cart")
                             .modelAttribute("items", itemDtoFlux)
                             .modelAttribute("total", sumService.calculateSum(itemDtoFlux))
+                            .modelAttribute("showPayButton", false)
                             .build());
                 });
     }
