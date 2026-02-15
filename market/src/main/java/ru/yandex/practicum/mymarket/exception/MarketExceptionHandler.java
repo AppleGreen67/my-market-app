@@ -14,4 +14,11 @@ public class MarketExceptionHandler {
         model.addAttribute("message", "Сервис временно недоступен");
         return Mono.just("error");
     }
+
+    @ExceptionHandler(PaymentException.class)
+    public Mono<String> handleException(PaymentException ex, Model model) {
+        System.out.println("Произошла payment ошибка: " + ex);
+        model.addAttribute("message", ex.getErrorMessage());
+        return Mono.just("error");
+    }
 }
