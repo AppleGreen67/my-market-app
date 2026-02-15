@@ -26,6 +26,10 @@ class BuyServiceTest {
     private CartService cartService;
     @MockitoBean
     private OrderService orderService;
+    @MockitoBean
+    private SumService sumService;
+    @MockitoBean
+    private PayService payService;
 
     @Autowired
     private BuyService service;
@@ -36,6 +40,9 @@ class BuyServiceTest {
 
         when(cartService.getCartItems(userId)).thenReturn(Flux.empty());
 
+        when(sumService.calculateSum(anyList())).thenReturn(8907L);
+        when(payService.pay(eq(userId), any())).thenReturn(Mono.just(true));
+
         StepVerifier.create(service.buy(userId))
                 .expectError(NoSuchElementException.class)
                 .verify();
@@ -43,6 +50,8 @@ class BuyServiceTest {
         verify(cartService).getCartItems(userId);
         verify(orderService, never()).create(userId);
         verify(orderService, never()).saveItems(anyList(), any());
+        verify(sumService, never()).calculateSum(anyList());
+        verify(payService, never()).pay(eq(userId), any());
     }
 
     @Test
@@ -50,6 +59,9 @@ class BuyServiceTest {
         Long userId = 17L;
 
         when(cartService.getCartItems(userId)).thenReturn(Flux.just(new ItemDto(), new ItemDto()));
+
+        when(sumService.calculateSum(anyList())).thenReturn(8907L);
+        when(payService.pay(eq(userId), any())).thenReturn(Mono.just(true));
 
         Long orderId = 1L;
         when(orderService.create(userId)).thenReturn(Mono.just(orderId));
@@ -68,5 +80,7 @@ class BuyServiceTest {
         verify(cartService).deleteAll(userId);
         verify(orderService).create(userId);
         verify(orderService).saveItems(anyList(), eq(orderId));
+        verify(sumService).calculateSum(anyList());
+        verify(payService).pay(eq(userId), any());
     }
 }

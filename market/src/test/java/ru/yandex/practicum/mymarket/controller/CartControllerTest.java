@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.mymarket.dto.ItemDto;
 import ru.yandex.practicum.mymarket.service.CartService;
+import ru.yandex.practicum.mymarket.service.PayService;
 import ru.yandex.practicum.mymarket.service.SumService;
 import ru.yandex.practicum.mymarket.service.user.IUserService;
 
@@ -31,6 +32,8 @@ class CartControllerTest {
     private IUserService userService;
     @MockitoBean
     private SumService sumService;
+    @MockitoBean
+    private PayService payService;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -54,6 +57,8 @@ class CartControllerTest {
 
         when(sumService.calculateSum(items)).thenReturn(Mono.just(8907L));
 
+        when(payService.checkBalance(eq(userId), any())).thenReturn(Mono.just(true));
+
         webTestClient.get()
                 .uri("/cart/items")
                 .exchange()
@@ -70,6 +75,7 @@ class CartControllerTest {
         verify(userService).getCurrentUserId();
         verify(cartService).getCartItems(userId);
         verify(sumService).calculateSum(items);
+        verify(payService).checkBalance(eq(userId), any());
     }
 
     @Test
@@ -90,6 +96,8 @@ class CartControllerTest {
 
         when(sumService.calculateSum(any(Flux.class))).thenReturn(Mono.just(7777L));
 
+        when(payService.checkBalance(eq(userId), any())).thenReturn(Mono.just(true));
+
         webTestClient.post()
                 .uri("/cart/items?id={id}&action={action}", id, action)
                 .exchange()
@@ -106,6 +114,7 @@ class CartControllerTest {
         verify(userService).getCurrentUserId();
         verify(cartService).updateCart(id, action, userId);
         verify(sumService).calculateSum(any(Flux.class));
+        verify(payService).checkBalance(eq(userId), any());
     }
 
     @Test
@@ -126,6 +135,8 @@ class CartControllerTest {
 
         when(sumService.calculateSum(any(Flux.class))).thenReturn(Mono.just(666L));
 
+        when(payService.checkBalance(eq(userId), any())).thenReturn(Mono.just(true));
+
         webTestClient.post()
                 .uri("/cart/items?id={id}&action={action}", id, action)
                 .exchange()
@@ -142,6 +153,7 @@ class CartControllerTest {
         verify(userService).getCurrentUserId();
         verify(cartService).updateCart(id, action, userId);
         verify(sumService).calculateSum(any(Flux.class));
+        verify(payService).checkBalance(eq(userId), any());
     }
 
     @Test
@@ -161,6 +173,8 @@ class CartControllerTest {
 
         when(sumService.calculateSum(any(Flux.class))).thenReturn(Mono.just(25L));
 
+        when(payService.checkBalance(eq(userId), any())).thenReturn(Mono.just(true));
+
         webTestClient.post()
                 .uri("/cart/items?id={id}&action={action}", id, action)
                 .exchange()
@@ -176,6 +190,7 @@ class CartControllerTest {
         verify(userService).getCurrentUserId();
         verify(cartService).updateCart(id, action, userId);
         verify(sumService).calculateSum(any(Flux.class));
+        verify(payService).checkBalance(eq(userId), any());
     }
 
     @Test
@@ -201,5 +216,6 @@ class CartControllerTest {
         verify(userService, never()).getCurrentUserId();
         verify(cartService, never()).updateCart(eq(id), eq(action), any());
         verify(sumService, never()).calculateSum(any(Flux.class));
+        verify(payService, never()).checkBalance(any(), any());
     }
 }
