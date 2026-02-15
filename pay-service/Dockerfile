@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY gradle gradle
 COPY build.gradle .
+COPY openapi.yaml .
 COPY gradlew .
 COPY settings.gradle .
 

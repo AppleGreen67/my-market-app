@@ -11,20 +11,12 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
     runtimeOnly "io.r2dbc:r2dbc-h2"
 
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
-    implementation("org.openapitools:jackson-databind-nullable:0.2.6")
-
-    implementation files('build/generated/java-reactive/lib/payment-client.jar')
-
-    testImplementation "org.springframework.boot:spring-boot-starter-test"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
-    testImplementation 'io.projectreactor:reactor-test'
+    implementation "org.springframework.boot:spring-boot-starter-data-redis-reactive"
 }
 
 openApiGenerate {
     generatorName = "java"
-    inputSpec = "$projectDir/src/main/resources/openapi.yaml"
+    inputSpec = "$rootDir/openapi.yaml"
     outputDir = "$buildDir/generated"
     modelPackage = "ru.yandex.practicum.mymarket.model"
 

@@ -4,24 +4,9 @@ plugins {
     id 'org.openapi.generator' version '7.2.0'
 }
 
-dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-webflux"
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
-
-    implementation("org.openapitools:jackson-databind-nullable:0.2.6")
-//    implementation "org.springframework.boot:spring-boot-starter-data-r2dbc"
-
-    testImplementation "org.springframework.boot:spring-boot-starter-test"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
-    testImplementation 'io.projectreactor:reactor-test'
-}
-
-
 openApiGenerate {
     generatorName = 'spring'
-    inputSpec = "$projectDir/src/main/resources/openapi.yaml"
+    inputSpec = "$rootDir/openapi.yaml"
     outputDir = "$buildDir/generated"
     apiPackage = 'ru.yandex.practicum.pay.controller'
     invokerPackage = 'ru.yandex.practicum.pay.invoker'
