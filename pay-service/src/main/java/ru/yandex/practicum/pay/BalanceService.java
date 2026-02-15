@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class BalanceService {
 
-    public Integer getBalance(Integer userId) {
-        return 3000;
+    public Long getBalance(Long userId) {
+        return 3000L;
     }
 }

@@ -1,7 +1,6 @@
 package ru.yandex.practicum.pay;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +19,7 @@ public class BalanceController implements BalanceApi {
     }
 
     @Override
-    public Mono<ResponseEntity<UserBalance>> userIdBalanceGet(@PathVariable("userId") Integer userId, @Parameter(hidden = true) final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<UserBalance>> userIdBalanceGet(@PathVariable("userId") Long userId, @Parameter(hidden = true) final ServerWebExchange exchange) {
         System.out.println("GET balance for user "+userId);
 
         UserBalance userBalance = new UserBalance();

@@ -21,6 +21,7 @@ paths:
           description: Уникальный идентификатор пользователя
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: Успешный ответ
@@ -93,8 +94,10 @@ components:
       properties:
         userId:
           type: integer
+          format: int64
         amount:
           type: integer
+          format: int64
 
     UserBalance:
       type: object
@@ -104,8 +107,10 @@ components:
       properties:
         userId:
           type: integer
+          format: int64
         balance:
           type: integer
+          format: int64
 
     ErrorResponse:
       type: object
