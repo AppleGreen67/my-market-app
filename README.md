@@ -1,7 +1,8 @@
 # Бэкенд веб-приложения «Витрина интернет-магазина»
-### Yandex Practicum. Java-Middle. Sprint 6
+### Yandex Practicum. Java-Middle. Sprint 7
 
 ## Запуск приложения
 0. Установить docker
 1. Перейти в корневой каталог репозитория (содержит docker-compose.yaml)
 2. Запустить в терминале 'docker compose up -d'
+3. Для завершения работы приложения используйте команду 'docker compose down'
