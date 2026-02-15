@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service;
 public class BalanceService {
 
     public Integer getBalance(Integer userId) {
-        return 1000000000;
+        return 3000;
     }
 }

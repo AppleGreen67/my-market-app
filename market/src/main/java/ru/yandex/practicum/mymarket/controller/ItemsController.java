@@ -32,14 +32,6 @@ public class ItemsController {
                                     @RequestParam(name = "sort", required = false) String sortParam,
                                     @RequestParam(name = "pageNumber", required = false) String number,
                                     @RequestParam(name = "pageSize", required = false) String size) {
-
-//        WebClient webClient = WebClient.create("http://pay:8080");
-//        Mono<String> responseBody = webClient.get()
-//                .uri("/pay")
-//                .retrieve()
-//                .bodyToMono(String.class);
-//        responseBody.subscribe(System.out::println);
-
         String sort = sortParam == null || sortParam.isEmpty() ? "NO" : sortParam;
 
         if (!("PRICE".equals(sort) || "ALPHA".equals(sort) || "NO".equals(sort))) {
