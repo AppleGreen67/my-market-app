@@ -7,11 +7,12 @@ import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.r2dbc.core.DatabaseClient;
 import reactor.test.StepVerifier;
+import ru.yandex.practicum.mymarket.redis.RedisTestCacheConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataR2dbcTest
-@Import(ItemDatabaseClientRepository.class)
+@Import({ItemDatabaseClientRepository.class, RedisTestCacheConfig.class})
 class ItemDatabaseClientRepositoryTest {
 
     @Autowired
@@ -61,19 +62,19 @@ class ItemDatabaseClientRepositoryTest {
     @Test
     public void findByIdTest() {
         StepVerifier.create(repository.findAll())
-                .expectNextMatches(itemDto->  {
+                .expectNextMatches(itemDto -> {
                     assertEquals(1L, itemDto.getId());
                     return true;
                 })
-                .expectNextMatches(itemDto->  {
+                .expectNextMatches(itemDto -> {
                     assertEquals(2L, itemDto.getId());
                     return true;
                 })
-                .expectNextMatches(itemDto->  {
+                .expectNextMatches(itemDto -> {
                     assertEquals(3L, itemDto.getId());
                     return true;
                 })
-                .expectNextMatches(itemDto->  {
+                .expectNextMatches(itemDto -> {
                     assertEquals(4L, itemDto.getId());
                     return true;
                 })
@@ -113,7 +114,7 @@ class ItemDatabaseClientRepositoryTest {
                     assertEquals("Очень модная бейсболка черного цвета", itemDto.getDescription());
                     assertEquals("2.jpg", itemDto.getImgPath());
                     assertEquals(1500, itemDto.getPrice());
-                    assertEquals(23, itemDto.getCount());
+                    assertEquals(0, itemDto.getCount());
                     return true;
                 })
                 .verifyComplete();

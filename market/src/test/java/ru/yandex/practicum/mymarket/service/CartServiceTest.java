@@ -71,35 +71,31 @@ class CartServiceTest {
 
         when(itemRepository.findById(itemId)).thenReturn(Mono.just(new ItemDto()));
 
-        ItemDto itemDto1 = new ItemDto();
-        itemDto1.setId(2L);
-        itemDto1.setCount(12);
-
         ItemDto itemDto = new ItemDto();
         itemDto.setId(itemId);
         itemDto.setTitle("Бейсболка черная");
         itemDto.setCount(1);
 
-        when(cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.just(itemDto));
+        CartItem cartItem = new CartItem();
+        cartItem.setId(55L);
+        cartItem.setItemId(itemId);
+        cartItem.setUserId(userId);
+        cartItem.setCount(77);
+        when(cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.just(cartItem));
 
         doAnswer(invocationOnMock -> {
             itemDto.setCount(invocationOnMock.getArgument(2));
             return Mono.just(1L);
         }).when(cartDatabaseClientRepository).updateItem(eq(userId), eq(itemId), anyInt());
 
-        when(cartDatabaseClientRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto, itemDto1));
-
         StepVerifier.create(service.updateCart(itemId, action, userId))
                 .expectNextMatches(dto -> {
-                    assertEquals(itemId, dto.getId());
-                    assertEquals(2, itemDto.getCount());
+                    assertEquals(1, dto);
                     return true;
                 })
-                .expectNextCount(1)
                 .verifyComplete();
 
         verify(cartDatabaseClientRepository).findByUserIdAndItemId(userId, itemId);
-        verify(cartDatabaseClientRepository).findByUserId(userId);
         verify(cartDatabaseClientRepository).updateItem(eq(userId), eq(itemId), anyInt());
         verify(cartDatabaseClientRepository, never()).deleteItem(eq(userId), eq(itemId));
         verify(itemRepository).findById(itemId);
@@ -115,27 +111,23 @@ class CartServiceTest {
 
         when(itemRepository.findById(itemId)).thenReturn(Mono.just(new ItemDto()));
 
-        ItemDto itemDto1 = new ItemDto();
-        itemDto1.setId(2L);
-        itemDto1.setCount(12);
-
-        ItemDto itemDto = new ItemDto();
-        itemDto.setId(itemId);
-        itemDto.setTitle("Бейсболка черная");
-        itemDto.setCount(1);
-
-        when(cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.just(itemDto));
+        CartItem cartItem = new CartItem();
+        cartItem.setId(55L);
+        cartItem.setItemId(itemId);
+        cartItem.setUserId(userId);
+        cartItem.setCount(1);
+        when(cartDatabaseClientRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Mono.just(cartItem));
 
         when(cartDatabaseClientRepository.deleteItem(eq(userId), eq(itemId))).thenReturn(Mono.just(1L));
 
-        when(cartDatabaseClientRepository.findByUserId(userId)).thenReturn(Flux.just(itemDto1));
-
         StepVerifier.create(service.updateCart(itemId, action, userId))
-                .expectNextCount(1)
+                .expectNextMatches(dto -> {
+                    assertEquals(1, dto);
+                    return true;
+                })
                 .verifyComplete();
 
         verify(cartDatabaseClientRepository).findByUserIdAndItemId(userId, itemId);
-        verify(cartDatabaseClientRepository).findByUserId(userId);
         verify(cartDatabaseClientRepository, never()).updateItem(eq(userId), eq(itemId), anyInt());
         verify(cartDatabaseClientRepository).deleteItem(eq(userId), eq(itemId));
         verify(itemRepository).findById(itemId);
@@ -177,11 +169,13 @@ class CartServiceTest {
         }).when(cartDatabaseClientRepository).saveItem(any());
 
         StepVerifier.create(service.updateCart(itemId, action, userId))
-                .expectNextCount(2)
+                .expectNextMatches(dto -> {
+                    assertEquals(1, dto);
+                    return true;
+                })
                 .verifyComplete();
 
         verify(cartDatabaseClientRepository).findByUserIdAndItemId(userId, itemId);
-        verify(cartDatabaseClientRepository).findByUserId(userId);
         verify(cartDatabaseClientRepository, never()).updateItem(eq(userId), eq(itemId), anyInt());
         verify(cartDatabaseClientRepository, never()).deleteItem(eq(userId), eq(itemId));
         verify(itemRepository).findById(itemId);

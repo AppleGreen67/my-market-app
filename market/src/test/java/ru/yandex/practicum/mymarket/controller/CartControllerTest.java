@@ -77,14 +77,16 @@ class CartControllerTest {
         long id = 1L;
         String action = "PLUS";
 
-         Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+        ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111);
+        Flux<ItemDto> items = Flux.just(itemDto,
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         Long userId = 1L;
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
-        when(cartService.updateCart(id, action, userId)).thenReturn(items);
+        when(cartService.updateCart(id, action, userId)).thenReturn(Mono.just(1L));
+        when(cartService.getCartItems(userId)).thenReturn(items);
 
         when(sumService.calculateSum(any(Flux.class))).thenReturn(Mono.just(7777L));
 
@@ -111,14 +113,16 @@ class CartControllerTest {
         long id = 1L;
         String action = "MINUS";
 
-         Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+        ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111);
+        Flux<ItemDto> items = Flux.just(itemDto,
                 new ItemDto(2L, "title2", "description2", "imageUrl", 22L, 222),
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         Long userId = 1L;
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
-        when(cartService.updateCart(id, action, userId)).thenReturn(items);
+        when(cartService.updateCart(id, action, userId)).thenReturn(Mono.just(1L));
+        when(cartService.getCartItems(userId)).thenReturn(items);
 
         when(sumService.calculateSum(any(Flux.class))).thenReturn(Mono.just(666L));
 
@@ -145,13 +149,15 @@ class CartControllerTest {
         long id = 1L;
         String action = "DELETE";
 
-         Flux<ItemDto> items = Flux.just(new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111),
+        ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 11L, 111);
+        Flux<ItemDto> items = Flux.just(itemDto,
                 new ItemDto(3L, "title3", "description3", "imageUrl", 33L, 333));
 
         Long userId = 1L;
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
-        when(cartService.updateCart(id, action, userId)).thenReturn(items);
+        when(cartService.updateCart(id, action, userId)).thenReturn(Mono.just(1L));
+        when(cartService.getCartItems(userId)).thenReturn(items);
 
         when(sumService.calculateSum(any(Flux.class))).thenReturn(Mono.just(25L));
 

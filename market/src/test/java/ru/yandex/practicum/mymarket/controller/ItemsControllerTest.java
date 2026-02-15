@@ -238,8 +238,9 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777);
-        when(itemsService.updateCountInCart(id, action, userId))
-                .thenReturn(Mono.just(itemDto));
+        when(itemsService.updateCountInCart(id, action, userId)).thenReturn(Mono.just(1L));
+
+        when(itemsService.find(userId, userId)).thenReturn(Mono.just(itemDto));
 
         webTestClient.post()
                 .uri("/items?id={id}&action={action}&search={search}&sort={sort}&pageNumber={pageNumber}&pageSize={pageSize}",
@@ -261,8 +262,9 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777);
-        when(itemsService.updateCountInCart(id, action, userId))
-                .thenReturn((Mono.just(itemDto)));
+        when(itemsService.updateCountInCart(id, action, userId)).thenReturn((Mono.just(1L)));
+
+        when(itemsService.find(userId, userId)).thenReturn(Mono.just(itemDto));
 
         webTestClient.post()
                 .uri("/items?id={id}&action={action}", id, action)
@@ -284,8 +286,9 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776);
-        when(itemsService.updateCountInCart(id, action, userId))
-                .thenReturn((Mono.just(itemDto)));
+        when(itemsService.updateCountInCart(id, action, userId)).thenReturn((Mono.just(1L)));
+
+        when(itemsService.find(userId, userId)).thenReturn(Mono.just(itemDto));
 
         webTestClient.post()
                 .uri("/items?id={id}&action={action}", id, action)
@@ -355,8 +358,9 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 777);
-        when(itemsService.updateCountInCart(id, action, userId))
-                .thenReturn((Mono.just(itemDto)));
+        when(itemsService.updateCountInCart(id, action, userId)).thenReturn((Mono.just(1L)));
+
+        when(itemsService.find(userId, userId)).thenReturn(Mono.just(itemDto));
 
         webTestClient.post()
                 .uri("/items/{id}?action={action}", id, action)
@@ -382,8 +386,9 @@ class ItemsControllerTest {
         when(userService.getCurrentUserId()).thenReturn(Mono.just(userId));
 
         ItemDto itemDto = new ItemDto(1L, "title1", "description1", "imageUrl", 0L, 776);
-        when(itemsService.updateCountInCart(id, action, userId))
-                .thenReturn(Mono.just(itemDto));
+        when(itemsService.updateCountInCart(id, action, userId)).thenReturn(Mono.just(1L));
+
+        when(itemsService.find(userId, userId)).thenReturn(Mono.just(itemDto));
 
         webTestClient.post()
                 .uri("/items/{id}?action={action}", id, action)

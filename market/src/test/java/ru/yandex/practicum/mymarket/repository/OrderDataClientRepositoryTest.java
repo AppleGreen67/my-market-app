@@ -7,12 +7,13 @@ import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.r2dbc.core.DatabaseClient;
 import reactor.test.StepVerifier;
+import ru.yandex.practicum.mymarket.redis.RedisTestCacheConfig;
 import ru.yandex.practicum.mymarket.service.SumService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataR2dbcTest
-@Import({OrderDatabaseClientRepository.class, ItemDatabaseClientRepository.class, SumService.class})
+@Import({OrderDatabaseClientRepository.class, ItemDatabaseClientRepository.class, SumService.class, RedisTestCacheConfig.class})
 class OrderDataClientRepositoryTest {
 
     @Autowired

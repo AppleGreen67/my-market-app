@@ -7,11 +7,12 @@ import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.r2dbc.core.DatabaseClient;
 import reactor.test.StepVerifier;
+import ru.yandex.practicum.mymarket.redis.RedisTestCacheConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataR2dbcTest
-@Import({CartDatabaseClientRepository.class, ItemDatabaseClientRepository.class})
+@Import({CartDatabaseClientRepository.class, ItemDatabaseClientRepository.class, RedisTestCacheConfig.class})
 class CartDatabaseClientRepositoryTest {
 
     @Autowired
