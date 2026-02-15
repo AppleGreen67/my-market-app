@@ -27,7 +27,7 @@ public class ItemsService {
 
     @Transactional
     public Mono<List<List<ItemDto>>> getItems(Long userId, String search, String sort, Integer pageNumber, Integer pageSize) {
-        return itemsCache.findAll(userId, search, sort, pageNumber, pageSize)
+        return itemsCache.findAll(search, sort, pageNumber, pageSize)
                 .collectList()
                 .flatMapMany(itemsList -> {
                     List<Long> ids = itemsList.stream().map(ItemDto::getId).toList();

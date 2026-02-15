@@ -12,6 +12,16 @@ dependencies {
     runtimeOnly "io.r2dbc:r2dbc-h2"
 
     implementation "org.springframework.boot:spring-boot-starter-data-redis-reactive"
+
+
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'com.redis:testcontainers-redis:2.2.2'
+    testImplementation 'org.testcontainers:junit-jupiter'
+
+
+//    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//    testImplementation 'io.projectreactor:reactor-test'
+//    testImplementation 'org.mockito:mockito-core'
 }
 
 openApiGenerate {

@@ -29,8 +29,7 @@ services:
   redis-server:
     container_name: redis_c
     hostname: redis-server
-    #    image: redis:7.4.2-bookworm
-    image: redis/redis-stack:7.2.0-v15
+    image: redis:7.4.2-bookworm
     networks:
       - app-network
 

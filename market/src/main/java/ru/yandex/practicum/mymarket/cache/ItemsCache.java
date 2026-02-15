@@ -10,6 +10,8 @@ import ru.yandex.practicum.mymarket.repository.ItemDatabaseClientRepository;
 
 import java.time.Duration;
 
+import static ru.yandex.practicum.mymarket.utils.KeyUtils.createKey;
+
 @Service
 public class ItemsCache {
 
@@ -29,18 +31,16 @@ public class ItemsCache {
         return itemRepository.findById(id);
     }
 
-    public Flux<ItemDto> findAll(Long userId, String search, String sort, Integer pageNumber, Integer pageSize) {
+    public Flux<ItemDto> findAll(String search, String sort, Integer pageNumber, Integer pageSize) {
         String key = createKey(search, sort, pageNumber, pageSize);
         return redisTemplate.opsForList()
                 .range(key, 0, -1)
                 .collectList()
                 .flatMapMany(cachedItems -> {
                     if (cachedItems != null && !cachedItems.isEmpty()) {
-                        System.out.println("Found items in cache");
                         return Flux.fromIterable(cachedItems);
                     }
 
-                    System.out.println("NO items in cache");
                     return findInDBAndSaveInCache(key, search, sort, pageNumber, pageSize);
                 });
     }
@@ -59,16 +59,4 @@ public class ItemsCache {
                 });
     }
 
-    private String createKey(String search, String sort, Integer pageNumber, Integer pageSize) {
-        return new StringBuilder()
-                .append("items:")
-                .append(search == null ? "" : search)
-                .append(":")
-                .append(sort)
-                .append(":")
-                .append(pageNumber)
-                .append(":")
-                .append(pageSize)
-                .append(":").toString();
-    }
 }
