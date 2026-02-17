@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+  name: y6-market
+
+  r2dbc:
+    url: r2dbc:h2:mem:///~/db/testdb;MODE=MYSQL
+    username: test
+    password: test
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:sql/data.sql
+  data:
+    redis:
+      host: redis-server
+      port: 6379
+    cache:
+      redis:
+        time-to-live: PT10M    # TTL по умолчанию для кешей
+
+
+logging:
+  level:
+    org.springframework.r2dbc.core.DefaultDatabaseClient: DEBUG # заодно включим логирование SQL-запросов
+    io.r2dbc: DEBUG # и добавим больше деталей (не включать в настоящем приложении)

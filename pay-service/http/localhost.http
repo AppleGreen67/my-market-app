@@ -1,0 +1,15 @@
+###
+curl http://localhost:8080/1/balance
+
+### in container
+curl http://localhost:8081/1/balance
+
+###
+curl -X POST http://localhost:8080/pay \
+    -H "Content-Type: application/json;charset=UTF-8" \
+    -d '{"userId":17,"amount":90}'
+
+###
+curl -X POST http://localhost:8081/pay \
+    -H "Content-Type: application/json;charset=UTF-8" \
+    -d '{"userId":17,"amount":90}'

@@ -1,1 +1,3 @@
 rootProject.name = "y6-market"
+include "market"
+include "pay-service"
